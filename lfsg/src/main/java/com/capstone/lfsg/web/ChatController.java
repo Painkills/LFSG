@@ -1,38 +1,32 @@
 package com.capstone.lfsg.web;
 
-import com.capstone.lfsg.data.Message;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.capstone.lfsg.data.Note;
+import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+@AllArgsConstructor
 @Controller
 public class ChatController {
 
-    @Autowired
     private SimpMessagingTemplate messageTemplate;
 
-    // /app/note
-    @MessageMapping("/note")
-    @SendTo("/note/unsorted")
-    public Message receiveUnsortedNote(@Payload Message message) {
-        return message;
+    // /app/notes
+    @MessageMapping("/notes")
+    @SendTo("/unlabeled")
+    public Note receiveUnsortedNote(@Payload Note note) {
+        System.out.println(note);
+        return note;
     }
 
-    // /app/chatroom
-    @MessageMapping("/message")
-    @SendTo("/chatroom/public")
-    public Message receivePublicMessage(@Payload Message message) {
-        return message;
-    }
 
-    // /user/Name/private
-    @MessageMapping("/private-message")
-    public Message receivePrivateMessage(@Payload Message message) {
-
-        messageTemplate.convertAndSendToUser(message.getReceiverName(), "/private", message);
-        return message;
+    // /labeled/labelName
+    @MessageMapping("/labeled")
+    public Note receivePrivateMessage(@Payload Note note) {
+        messageTemplate.convertAndSend("/notes/" + note.getLabel(), note);
+        return note;
     }
 }
