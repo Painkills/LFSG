@@ -25,7 +25,7 @@ public class ChatController {
 
     // /labeled/labelName
     @MessageMapping("/labeled")
-    public Note receivePrivateMessage(@Payload Note note) {
+    public Note receiveLabeledNote(@Payload Note note) {
         messageTemplate.convertAndSend("/notes/" + note.getLabel(), note);
         return note;
     }
