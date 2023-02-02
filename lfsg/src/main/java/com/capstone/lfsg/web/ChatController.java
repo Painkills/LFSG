@@ -15,8 +15,8 @@ public class ChatController {
     private SimpMessagingTemplate messageTemplate;
 
     // /app/notes
-    @MessageMapping("/notes")
-    @SendTo("/unlabeled")
+    @MessageMapping("/new")
+    @SendTo("/notes/unlabeled")
     public Note receiveUnsortedNote(@Payload Note note) {
         System.out.println(note);
         return note;
