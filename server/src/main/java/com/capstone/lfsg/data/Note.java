@@ -11,7 +11,7 @@ public class Note {
 
     private String userName;
     private String label;
-    private String text;
+    private String message;
     private String date;
     private Status status;
     private Integer gold;
