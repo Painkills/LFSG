@@ -3,7 +3,9 @@ import ChatRoom from './component/ChatRoom'
 
 const App = () => {
   return (
-      <ChatRoom />
+      <div>
+      <ChatRoom/>
+      </div>
   )
 }
 
