@@ -23,7 +23,7 @@ public class ChatController {
     @MessageMapping("/new")
     @SendTo("/notes/unlabeled")
     public Note receiveUnsortedNote(@Payload Note note) {
-        System.out.println(note);
+        System.out.println("From receiveUnsortedNote: " + note);
         noteService.saveNote(note);
         return note;
     }
@@ -32,6 +32,7 @@ public class ChatController {
     // /labeled/labelName
     @MessageMapping("/labeled")
     public Note receiveLabeledNote(@Payload Note note) {
+        System.out.println("From receiveLabeledNote: " + note);
         Note existingNote = noteService.labelNote(note.getId(), note.getLabel());
         messageTemplate.convertAndSend("/notes/" + note.getLabel(), existingNote);
         return note;

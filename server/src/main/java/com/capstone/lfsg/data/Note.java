@@ -12,7 +12,7 @@ public class Note {
 
     @Id
     private String id;
-    private String userName;
+    private String senderName;
     private String label;
     private String message;
     private String date;

@@ -6,10 +6,10 @@ var stompClient =null;
 const ChatRoom = () => {
     const [privateChats, setPrivateChats] = useState(new Map());
     const [publicChats, setPublicChats] = useState([]);
-    const [tab,setTab] =useState("CHATROOM");
+    const [label,setLabel] = useState("CHATROOM");
     const [userData, setUserData] = useState({
         username: '',
-        receivername: '',
+        receiverName: '',
         connected: false,
         message: ''
     });
@@ -35,7 +35,7 @@ const ChatRoom = () => {
             senderName: userData.username,
             status:"JOIN"
         };
-        stompClient.send("/app/notes", {}, JSON.stringify(chatMessage));
+        stompClient.send("/app/new", {}, JSON.stringify(chatMessage));
     }
 
     const onMessageReceived = (payload)=>{
@@ -80,7 +80,7 @@ const ChatRoom = () => {
     const sendValue=()=>{
         if (stompClient) {
             var chatMessage = {
-                userName: userData.username,
+                senderName: userData.username,
                 message: userData.message,
                 status:"MESSAGE"
             };
@@ -94,13 +94,13 @@ const ChatRoom = () => {
         if (stompClient) {
             var chatMessage = {
                 senderName: userData.username,
-                receiverName:tab,
+                receiverName: label,
                 message: userData.message,
                 status:"MESSAGE"
             };
 
-            if(userData.username !== tab){
-                privateChats.get(tab).push(chatMessage);
+            if(userData.username !== label){
+                privateChats.get(label).push(chatMessage);
                 setPrivateChats(new Map(privateChats));
             }
             stompClient.send("/app/notes", {}, JSON.stringify(chatMessage));
@@ -116,19 +116,21 @@ const ChatRoom = () => {
     const registerUser=()=>{
         connect();
     }
+
     return (
+        // Chat Box
         <div className="container">
             {userData.connected?
                 <div className="chat-box">
                     <div className="member-list">
                         <ul>
-                            <li onClick={()=>{setTab("CHATROOM")}} className={`member ${tab==="CHATROOM" && "active"}`}>Chatroom</li>
+                            <li onClick={()=>{setLabel("CHATROOM")}} className={`member ${label==="CHATROOM" && "active"}`}>Chatroom</li>
                             {[...privateChats.keys()].map((name,index)=>(
-                                <li onClick={()=>{setTab(name)}} className={`member ${tab===name && "active"}`} key={index}>{name}</li>
+                                <li onClick={()=>{setLabel(name)}} className={`member ${label===name && "active"}`} key={index}>{name}</li>
                             ))}
                         </ul>
                     </div>
-                    {tab==="CHATROOM" && <div className="chat-content">
+                    {label==="CHATROOM" && <div className="chat-content">
                         <ul className="chat-messages">
                             {publicChats.map((chat,index)=>(
                                 <li className={`message ${chat.senderName === userData.username && "self"}`} key={index}>
@@ -144,9 +146,9 @@ const ChatRoom = () => {
                             <button type="button" className="send-button" onClick={sendValue}>send</button>
                         </div>
                     </div>}
-                    {tab!=="CHATROOM" && <div className="chat-content">
+                    {label!=="CHATROOM" && <div className="chat-content">
                         <ul className="chat-messages">
-                            {[...privateChats.get(tab)].map((chat,index)=>(
+                            {[...privateChats.get(label)].map((chat,index)=>(
                                 <li className={`message ${chat.senderName === userData.username && "self"}`} key={index}>
                                     {chat.senderName !== userData.username && <div className="avatar">{chat.senderName}</div>}
                                     <div className="message-data">{chat.message}</div>
@@ -161,7 +163,11 @@ const ChatRoom = () => {
                         </div>
                     </div>}
                 </div>
+
+                // If not registered
                 :
+
+                // Registration box
                 <div className="register">
                     <input
                         id="user-name"
