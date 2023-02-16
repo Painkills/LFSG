@@ -5,7 +5,7 @@ import SockJS from 'sockjs-client';
 
 let stompClient =null;
 const ChatRoom = () => {
-    const [registerPage, setRegisterPage] = useState(false)
+    const [registerPage, setRegisterPage] = useState(false);
     const [labeledNotes, setLabeledNotes] = useState(new Map());
     const [unlabeledNotes, setUnlabeledNotes] = useState([]);
     const [tab,setTab] = useState("CHATROOM");
@@ -26,13 +26,13 @@ const ChatRoom = () => {
         username: '',
         password: '',
         label: '',
-        chatId: '',
         connected: false,
         message: ''
     });
-    useEffect(() => {
-        console.log(userData);
-    }, [userData]);
+
+    // useEffect(() => {
+    //     console.log(unlabeledNotes)
+    // }, [unlabeledNotes]);
 
     const connect =()=>{
         let Sock = new SockJS('http://localhost:8082/ws');
@@ -56,7 +56,7 @@ const ChatRoom = () => {
     }
 
     const onNoteSubmitted = (payload)=>{
-        let payloadData = JSON.parse(payload.body);
+        let payloadData = JSON.parse(payload.body)
         switch(payloadData.status){
             case "JOIN":
                 // if(!unlabeledNotes.get(payloadData.senderName)){
@@ -86,6 +86,9 @@ const ChatRoom = () => {
             labeledNotes.set(payloadData.label, list);
             setLabeledNotes(new Map(labeledNotes));
         }
+        // let updatedNotes = unlabeledNotes
+        // updatedNotes = updatedNotes.filter(note => note.id !== payloadData.id)
+        // setUnlabeledNotes(updatedNotes);
     }
 
     const onError = (err) => {
@@ -96,11 +99,6 @@ const ChatRoom = () => {
     const handleMessage =(event)=>{
         const {value}=event.target;
         setUserData({...userData,"message": value});
-    }
-
-    const handleLabelSelect =(event)=>{
-        const value = event.target.id;
-        setUserData({...userData,"chatId": value});
     }
 
     const handleLabelInput = (event) => {
@@ -115,38 +113,19 @@ const ChatRoom = () => {
                 message: userData.message,
                 status:"MESSAGE"
             };
-            console.log(chatMessage);
             stompClient.send("/app/new", {}, JSON.stringify(chatMessage));
             setUserData({...userData,"message": ""});
         }
     }
 
-    const sendPrivateValue=()=>{
-        if (stompClient) {
-            let chatMessage = {
-                senderName: userData.username,
-                label: tab,
-                message: userData.message,
-                status:"MESSAGE"
-            };
-
-            if(userData.username !== tab){
-                labeledNotes.get(tab).push(chatMessage);
-                setLabeledNotes(new Map(labeledNotes));
-            }
-            stompClient.send("/app/labeled", {}, JSON.stringify(chatMessage));
-            setUserData({...userData,"message": ""});
-        }
-    }
-
-    const labelNote = () => {
-        let note = unlabeledNotes[userData.chatId]
+    const labelNote = (index) => {
+        let note = unlabeledNotes[index]
         let labelArray = userData.label.split(',')
-        for (const label in labelArray) {
-            note.label = label;
+        for (let index in labelArray) {
+            note.label = labelArray[index];
             stompClient.send("/app/labeled", {}, JSON.stringify(note));
-            setUserData({...userData,"label": ""});
         }
+        setUserData({...userData,"label": ""});
     }
 
     const handleUsername=(event)=>{
@@ -171,7 +150,7 @@ const ChatRoom = () => {
     }
 
 //THIS ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    
+
 
     const onInputChange = e => {
         const { name, value } = e.target;
@@ -309,8 +288,8 @@ const ChatRoom = () => {
                                     {chat.senderName !== userData.username && <div className="avatar">{chat.senderName}</div>}
                                     <div className="message-data">{chat.message}</div>
                                     <div className="message-id">
-                                        <input id={`${index}`} type="text" className="message-id" placeholder="choose a label" value={userData.label} onChange={handleLabelInput} onSelect={handleLabelSelect} />
-                                        <button type="button" className="mini-button" onClick={labelNote}>Set</button>
+                                        <input type="text" className="message-id" placeholder="choose a label" value={userData.label} onChange={handleLabelInput}/>
+                                        <button type="button" className="mini-button" onClick={() => labelNote(index)}>Set</button>
                                     </div>
                                     {chat.senderName === userData.username && <div className="avatar self">{chat.senderName}</div>}
                                 </li>
@@ -319,7 +298,7 @@ const ChatRoom = () => {
                         {/* Enter message and send */}
                         <div className="send-message">
                             <input type="text" className="input-message" placeholder="enter the message" value={userData.message} onChange={handleMessage} />
-                            <button type="button" className="send-button" onClick={sendNote}>Submit unlabeled note</button>
+                            <button type="button" className="send-button" onClick={sendNote}>Submit</button>
                         </div>
                     </div>}
 
@@ -334,11 +313,11 @@ const ChatRoom = () => {
                                 </li>
                             ))}
                         </ul>
-                        {/* Enter message and send */}
-                        <div className="send-message">
-                            <input type="text" className="input-message" placeholder="enter the message" value={userData.message} onChange={handleMessage} />
-                            <button type="button" className="send-button" onClick={sendPrivateValue}>Submit to this label</button>
-                        </div>
+                        {/*/!* Enter message and send *!/*/}
+                        {/*<div className="send-message">*/}
+                        {/*    <input type="text" className="input-message" placeholder="enter the message" value={userData.message} onChange={handleMessage} />*/}
+                        {/*    <button type="button" className="send-button" onClick={sendPrivateValue}>Submit to this label</button>*/}
+                        {/*</div>*/}
 
                     </div>}
                 </div>
