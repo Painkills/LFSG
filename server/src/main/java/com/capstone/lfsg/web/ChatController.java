@@ -13,10 +13,11 @@ import org.springframework.stereotype.Controller;
 public class ChatController {
 
     private final NoteService noteService;
-    private SimpMessagingTemplate messageTemplate;
+    private final SimpMessagingTemplate messageTemplate;
 
-    public ChatController(NoteService noteService) {
+    public ChatController(NoteService noteService, SimpMessagingTemplate messageTemplate) {
         this.noteService = noteService;
+        this.messageTemplate = messageTemplate;
     }
 
     // /app/notes
@@ -34,7 +35,7 @@ public class ChatController {
     public Note receiveLabeledNote(@Payload Note note) {
         System.out.println("From receiveLabeledNote: " + note);
         Note existingNote = noteService.labelNote(note.getId(), note.getLabel());
-        messageTemplate.convertAndSend("/notes/" + note.getLabel(), existingNote);
+        messageTemplate.convertAndSend("/notes/labeled/" + note.getLabel(), existingNote);
         return note;
     }
 }
