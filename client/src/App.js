@@ -1,10 +1,10 @@
 import React from 'react'
-import ChatRoom from './component/ChatRoom'
+import RaidRoom from './component/RaidRoom'
 
 const App = () => {
   return (
       <div>
-      <ChatRoom/>
+      <RaidRoom/>
       </div>
   )
 }

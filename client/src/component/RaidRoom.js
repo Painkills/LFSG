@@ -3,11 +3,11 @@ import { over } from 'stompjs';
 import SockJS from 'sockjs-client';
 
 let stompClient =null;
-const ChatRoom = () => {
+const RaidRoom = () => {
     const [registerPage, setRegisterPage] = useState(false);
     const [labeledNotes, setLabeledNotes] = useState(new Map());
     const [unlabeledNotes, setUnlabeledNotes] = useState([]);
-    const [tab,setTab] = useState("CHATROOM");
+    const [tab,setTab] = useState("UNLABELED");
 		const [input, setInput] = useState({
         name: '',
         email: '',
@@ -73,9 +73,7 @@ const ChatRoom = () => {
 
     const onNoteLabeled = (payload)=>{
         let payloadData = JSON.parse(payload.body);
-        console.log(unlabeledNotes)
         setUnlabeledNotes(unlabeledNotes.filter((note) => note.id !== payloadData.id))
-        console.log(unlabeledNotes)
         if(labeledNotes.get(payloadData.label)){
             labeledNotes.get(payloadData.label).push(payloadData);
             setLabeledNotes(new Map(labeledNotes));
@@ -85,9 +83,6 @@ const ChatRoom = () => {
             labeledNotes.set(payloadData.label, list);
             setLabeledNotes(new Map(labeledNotes));
         }
-        // let updatedNotes = unlabeledNotes
-        // updatedNotes = updatedNotes.filter(note => note.id !== payloadData.id)
-        // setUnlabeledNotes(updatedNotes);
     }
 
     const onError = (err) => {
@@ -264,7 +259,7 @@ const ChatRoom = () => {
     }
     if (registerPage === false) {
         return (
-            // Chat Box
+            // Raid Room Area
         <div className="container">
             {userData.connected? // If the user IS connected...
 
@@ -272,27 +267,29 @@ const ChatRoom = () => {
                 <div className="chat-box">
                     <div className="member-list">
                         <ul>
-                            <li onClick={()=>{setTab("CHATROOM")}} className={`member ${tab==="CHATROOM" && "active"}`}>Chatroom</li>
+                            <li onClick={()=>{setTab("UNLABELED")}} className={`member ${tab==="UNLABELED" && "active"}`}>Unlabeled</li>
                             {[...labeledNotes.keys()].map((name,index)=>(
-                                <li onClick={()=>{setTab(name)}} className={`member ${tab===name && "active"}`} key={index}>{name}</li>
+                                <li onClick={()=>{setTab(name)}} className={`member ${tab===name && "active"}`} key={index}>Label: {name}</li>
                             ))}
                         </ul>
                     </div>
 
                     {/* Unlabelled notes box */}
-                    {tab==="CHATROOM" && <div className="chat-content">
+                    {tab==="UNLABELED" && <div className="chat-content">
                         <ul className="chat-messages">
-                            {unlabeledNotes.map((chat,index)=>(
-                                <li className={`message ${chat.senderName === userData.username && "self"}`} key={index}>
-                                    {chat.senderName !== userData.username && <div className="avatar">{chat.senderName}</div>}
-                                    <div className="message-data">{chat.message}</div>
+                            {unlabeledNotes.map((currentNote,index) => {
+                                if (currentNote.label !== null) return null;
+                                return (
+                                <li className={`message ${currentNote.senderName === userData.username && "self"}`} key={index}>
+                                    {currentNote.senderName !== userData.username && <div className="avatar">{currentNote.senderName}</div>}
+                                    <div className="message-data">{currentNote.message}</div>
                                     <div className="message-id">
                                         <input type="text" className="message-id" placeholder="choose a label" value={userData.label} onChange={handleLabelInput}/>
                                         <button type="button" className="mini-button" onClick={() => labelNote(index)}>Set</button>
                                     </div>
-                                    {chat.senderName === userData.username && <div className="avatar self">{chat.senderName}</div>}
+                                    {currentNote.senderName === userData.username && <div className="avatar self">{currentNote.senderName}</div>}
                                 </li>
-                            ))}
+                            )})}
                         </ul>
                         {/* Enter message and send */}
                         <div className="send-message">
@@ -302,7 +299,7 @@ const ChatRoom = () => {
                     </div>}
 
                     {/* Labeled notes box */}
-                    {tab!=="CHATROOM" && <div className="chat-content">
+                    {tab!=="UNLABELED" && <div className="chat-content">
                         <ul className="chat-messages">
                             {[...labeledNotes.get(tab)].map((chat,index)=>(
                                 <li className={`message ${chat.senderName === userData.username && "self"}`} key={index}>
@@ -312,11 +309,6 @@ const ChatRoom = () => {
                                 </li>
                             ))}
                         </ul>
-                        {/*/!* Enter message and send *!/*/}
-                        {/*<div className="send-message">*/}
-                        {/*    <input type="text" className="input-message" placeholder="enter the message" value={userData.message} onChange={handleMessage} />*/}
-                        {/*    <button type="button" className="send-button" onClick={sendPrivateValue}>Submit to this label</button>*/}
-                        {/*</div>*/}
 
                     </div>}
                 </div>
@@ -354,4 +346,4 @@ const ChatRoom = () => {
     }
 }
 
-export default ChatRoom
+export default RaidRoom

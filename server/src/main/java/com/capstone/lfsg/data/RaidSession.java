@@ -4,22 +4,18 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Note {
-
+public class RaidSession {
     @Id
     private String id;
-    private String senderName;
+    private List<Student> participants;
     private String label;
-    private String message;
+    private List<Note> notes;
     private LocalDateTime createdAt;
-    private Status status;
-    private Integer gold;
-
-
 }

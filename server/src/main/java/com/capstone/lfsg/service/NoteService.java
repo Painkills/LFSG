@@ -4,6 +4,7 @@ import com.capstone.lfsg.data.Note;
 import com.capstone.lfsg.data.NoteRepo;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -14,13 +15,12 @@ public class NoteService {
         this.noteRepo = noteRepo;
     }
 
-    public boolean saveNote(Note note) {
+    public void saveNote(Note note) {
         try {
+            note.setCreatedAt(LocalDateTime.now());
             noteRepo.save(note);
-            return true;
         } catch (Exception e) {
             System.out.println(e);
-            return false;
         }
     }
 
