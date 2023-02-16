@@ -25,6 +25,12 @@ button{
   font-weight: bold;
 }
 
+mini-button{
+  border: none;
+  background: green;
+  color:#fff;
+}
+
 
 .container{
   position: relative;
@@ -120,6 +126,12 @@ ul {
 }
 .message-data{
   padding:5px;
+}
+
+.message-id{
+  padding:5px;
+  font-size: xx-small;
+  justify-content: center;
 }
 .message.self{
   justify-content: end;

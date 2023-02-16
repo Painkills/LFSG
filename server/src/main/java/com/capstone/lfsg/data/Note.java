@@ -1,6 +1,7 @@
 package com.capstone.lfsg.data;
 
 import lombok.*;
+import org.springframework.data.annotation.Id;
 
 @Getter
 @Setter
@@ -9,7 +10,9 @@ import lombok.*;
 @ToString
 public class Note {
 
-    private String userName;
+    @Id
+    private String id;
+    private String senderName;
     private String label;
     private String message;
     private String date;
