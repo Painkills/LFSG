@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { over } from 'stompjs';
 import { Modal, Button, Form } from "react-bootstrap";
 import SockJS from 'sockjs-client';
+import OpenedNote from './OpenedNote.js'
 
 let stompClient =null;
 const ChatRoom = () => {
@@ -169,6 +170,10 @@ const ChatRoom = () => {
                                     <div className="message-id">
                                         <input id={`${index}`} type="text" className="message-id" placeholder="choose a label" value={userData.label} onChange={handleLabelInput} onSelect={handleLabelSelect} />
                                         <button type="button" className="mini-button" onClick={labelNote}>Set</button>
+                                        <OpenedNote trigger={false}>
+                                            <h3>User: {chat.senderName}</h3>
+                                            <p>{chat.message}</p>
+                                        </OpenedNote>
                                     </div>
                                     {chat.senderName === userData.username && <div className="avatar self">{chat.senderName}</div>}
                                 </li>
