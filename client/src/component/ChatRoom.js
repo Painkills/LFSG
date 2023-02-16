@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { over } from 'stompjs';
-import { Modal, Button, Form } from "react-bootstrap";
 import SockJS from 'sockjs-client';
 
 let stompClient =null;
@@ -30,9 +29,9 @@ const ChatRoom = () => {
         message: ''
     });
 
-    // useEffect(() => {
-    //     console.log(unlabeledNotes)
-    // }, [unlabeledNotes]);
+    useEffect(() => {
+        console.log(unlabeledNotes)
+    }, [unlabeledNotes]);
 
     const connect =()=>{
         let Sock = new SockJS('http://localhost:8082/ws');
@@ -222,7 +221,7 @@ const ChatRoom = () => {
                         placeholder='Enter Name'
                         value={input.name}
                         onChange={onInputChange}
-                        onBlur={validateInput}></input>
+                        onBlur={validateInput}/>
                     {error.name && <span className='err'>{error.name}</span>}
                     </div>
                     <div style={{display: "flex"}}>
@@ -232,7 +231,7 @@ const ChatRoom = () => {
                         placeholder='Enter Email'
                         value={input.email}
                         onChange={onInputChange}
-                        onBlur={validateInput}></input>
+                        onBlur={validateInput}/>
                     {error.email && <span className='err'>{error.email}</span>}
                     </div>
 
@@ -243,7 +242,7 @@ const ChatRoom = () => {
                         placeholder='Enter Password'
                         value={input.password}
                         onChange={onInputChange}
-                        onBlur={validateInput}></input>
+                        onBlur={validateInput}/>
                     {error.password && <span className='err'>{error.password}</span>}
                     </div>
 
@@ -254,7 +253,7 @@ const ChatRoom = () => {
                         placeholder='Enter Confirm Password'
                         value={input.confirmPassword}
                         onChange={onInputChange}
-                        onBlur={validateInput}></input>
+                        onBlur={validateInput}/>
                     {error.confirmPassword && <span className='err'>{error.confirmPassword}</span>}
                     </div>
 
@@ -329,7 +328,6 @@ const ChatRoom = () => {
                             name="userName"
                             value={userData.username}
                             onChange={handleUsername}
-                            margin="normal"
                         />
                         <input
                             id="user-pass"
@@ -337,7 +335,6 @@ const ChatRoom = () => {
                             name="password"
                             value={userData.password}
                             onChange={handlePassword}
-                            margin="normal"
                         />
 
                         <button type="button" onClick={registerUser}>
