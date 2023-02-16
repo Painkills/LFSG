@@ -28,7 +28,7 @@ const ChatRoom = () => {
     const onConnected = () => {
         setUserData({...userData,"connected": true});
         stompClient.subscribe('/notes/unlabeled', onNoteSubmitted);
-        stompClient.subscribe('/notes/labeled/label01', onNoteLabeled);
+        stompClient.subscribe('/notes/labeled/*', onNoteLabeled);
         userJoin();
     }
 
@@ -59,6 +59,9 @@ const ChatRoom = () => {
 
     const onNoteLabeled = (payload)=>{
         let payloadData = JSON.parse(payload.body);
+        console.log(unlabeledNotes)
+        setUnlabeledNotes(unlabeledNotes.filter((note) => note.id !== payloadData.id))
+        console.log(unlabeledNotes)
         if(labeledNotes.get(payloadData.label)){
             labeledNotes.get(payloadData.label).push(payloadData);
             setLabeledNotes(new Map(labeledNotes));
@@ -123,9 +126,12 @@ const ChatRoom = () => {
 
     const labelNote = () => {
         let note = unlabeledNotes[userData.chatId]
-        note.label = userData.label;
-        stompClient.send("/app/labeled", {}, JSON.stringify(note));
-        setUserData({...userData,"message": ""});
+        let labelArray = userData.label.split(',')
+        for (const label in labelArray) {
+            note.label = label;
+            stompClient.send("/app/labeled", {}, JSON.stringify(note));
+            setUserData({...userData,"label": ""});
+        }
     }
 
     const handleUsername=(event)=>{
@@ -161,7 +167,7 @@ const ChatRoom = () => {
                                     {chat.senderName !== userData.username && <div className="avatar">{chat.senderName}</div>}
                                     <div className="message-data">{chat.message}</div>
                                     <div className="message-id">
-                                        <input id={`${index}`} type="text" className="message-id" placeholder="label" value={userData.label} onChange={handleLabelInput} onSelect={handleLabelSelect} />
+                                        <input id={`${index}`} type="text" className="message-id" placeholder="choose a label" value={userData.label} onChange={handleLabelInput} onSelect={handleLabelSelect} />
                                         <button type="button" className="mini-button" onClick={labelNote}>Set</button>
                                     </div>
                                     {chat.senderName === userData.username && <div className="avatar self">{chat.senderName}</div>}

@@ -29,7 +29,6 @@ mini-button{
   border: none;
   background: green;
   color:#fff;
-  font-size: 0.5em;
 }
 
 
@@ -132,6 +131,7 @@ ul {
 .message-id{
   padding:5px;
   font-size: xx-small;
+  justify-content: center;
 }
 .message.self{
   justify-content: end;
