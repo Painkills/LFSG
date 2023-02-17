@@ -36,6 +36,7 @@ public class ChatController {
         System.out.println("From receiveLabeledNote: " + note);
         Note existingNote = noteService.labelNote(note.getId(), note.getLabel());
         messageTemplate.convertAndSend("/notes/labeled/" + note.getLabel(), existingNote);
+        noteService.makePDF();
         return note;
     }
 }
