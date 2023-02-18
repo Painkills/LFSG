@@ -2,10 +2,8 @@ package com.capstone.lfsg.web;
 
 import com.capstone.lfsg.data.Note;
 import com.capstone.lfsg.service.NoteService;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,17 +12,14 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Controller
 public class ChatController {
@@ -41,8 +36,8 @@ public class ChatController {
     @GetMapping("/pdf")
     @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<Resource> createPDF() throws IOException {
-        noteService.makePDF();
-        InputStream inputStream = new ClassPathResource("files/output.pdf").getInputStream();
+        ByteArrayOutputStream out = noteService.makePDF();
+        InputStream inputStream = new ByteArrayInputStream(out.toByteArray());
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; output.pdf");
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE);
@@ -50,14 +45,6 @@ public class ChatController {
         InputStreamResource resource = new InputStreamResource(inputStream);
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
-
-    // through websocket
-//    @MessageMapping("/pdf")
-//    public void handlePdfDownload(StompHeaderAccessor headerAccessor) throws Exception {
-//        File file = new File("files/output.pdf");
-//        byte[] pdfData = Files.readAllBytes(file.toPath());
-//        headerAccessor.getSessionAttributes().put("pdfData", pdfData);
-//    }
 
     // /app/notes
     @MessageMapping("/new")

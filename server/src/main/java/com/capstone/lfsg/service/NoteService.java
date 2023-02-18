@@ -7,6 +7,8 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -52,15 +54,16 @@ public class NoteService {
         }
     }
 
-    public void makePDF() {
+    public ByteArrayOutputStream makePDF() {
         // Query MongoDB to retrieve the documents you want to include in the PDF file
         Iterable<Note> notes = noteRepo.findByOrderByLabelAsc();
 
         // Create a new PDF document
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document pdfDoc = new Document();
         try {
             // Start PdfWriter
-            PdfWriter.getInstance(pdfDoc, new FileOutputStream("server/src/main/resources/files/output.pdf"));
+            PdfWriter.getInstance(pdfDoc, out);
 
             // Open doc
             pdfDoc.open();
@@ -100,5 +103,6 @@ public class NoteService {
         } catch (Exception e) {
             System.out.println(e);
         }
+        return out;
     }
 }
