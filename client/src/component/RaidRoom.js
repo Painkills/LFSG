@@ -43,7 +43,7 @@ const RaidRoom = () => {
         setUserData({...userData,"connected": true});
         stompClient.subscribe('/notes/unlabeled', onNoteSubmitted);
         stompClient.subscribe('/notes/labeled/*', onNoteLabeled);
-        userJoin();
+        // userJoin();
     }
 
     const userJoin=()=>{
@@ -141,6 +141,29 @@ const RaidRoom = () => {
         }else{
             setRegisterPage(false)
         }
+    }
+
+    const getPdf = () => {
+        fetch('http://localhost:8082/pdf')
+            .then(response => {
+                const contentDisposition = response.headers.get('Content-Disposition');
+                const filenameMatch = contentDisposition ? contentDisposition.match(/filename="(.+)"/) : null;
+                const filename = filenameMatch ? filenameMatch[1] : 'document.pdf';
+                return response.blob().then(blob => {
+                    console.log(blob)
+                    // Save the file to the user's device
+                    const url = window.URL.createObjectURL(new Blob([blob]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', filename);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            })
+            .catch(error => {
+                console.error('Error downloading file:', error);
+            });
     }
 
 //THIS ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -309,8 +332,10 @@ const RaidRoom = () => {
                                 </li>
                             ))}
                         </ul>
-
                     </div>}
+                    <div>
+                        <button type="button" className="send-button" onClick={getPdf}>getPDF</button>
+                    </div>
                 </div>
                     :
                     <div className="register">
@@ -337,10 +362,7 @@ const RaidRoom = () => {
                         </button>
 
                     </div>
-
                 }
-
-
             </div>
         )
     }
