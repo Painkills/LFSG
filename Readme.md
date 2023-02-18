@@ -1,6 +1,7 @@
 Looking For Study Group (LFSG) is a collaborative, gamified, note-taking platform.
 
 LFSG Team is:
+
 David Fortich - LFSG Backend
 
 Jorrel Tigbayan - LFSG Frontend
