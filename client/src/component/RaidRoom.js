@@ -144,7 +144,7 @@ const RaidRoom = () => {
     }
 
     const getPdf = () => {
-        fetch('http://localhost:8082/pdf')
+        fetch('/pdf')
             .then(response => {
                 const contentDisposition = response.headers.get('Content-Disposition');
                 const filenameMatch = contentDisposition ? contentDisposition.match(/filename="(.+)"/) : null;
