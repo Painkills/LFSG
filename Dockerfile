@@ -1,5 +1,5 @@
 FROM openjdk:19
 
-COPY server/target/lfsg-0.0.1-SNAPSHOT.jar app.jar
+COPY target/lfsg-0.0.1-SNAPSHOT.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "/server/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app.jar"]
