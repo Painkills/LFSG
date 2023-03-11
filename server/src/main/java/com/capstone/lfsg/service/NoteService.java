@@ -9,11 +9,6 @@ import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 
@@ -68,10 +63,13 @@ public class NoteService {
             // Open doc
             pdfDoc.open();
 
-            // Set header
-//            Path imgPath = Paths.get((ClassLoader.getSystemResource("img").toURI()));
-//            Image header = Image.getInstance(imgPath.toAbsolutePath().toString());
-//            pdfDoc.add(header);
+            // Create header
+            String imgPath = "server\\src\\main\\resources\\img\\lfsg_logo.png";
+            Image header = Image.getInstance(imgPath);
+                //Scale image
+            float scaler = ((pdfDoc.getPageSize().getWidth() - pdfDoc.leftMargin() - pdfDoc.rightMargin()) / header.getWidth()) * 100;
+            header.scalePercent(scaler);
+
 
             // Iterate through the documents and generate a new page for each one
             String previousLabel = "";
@@ -81,13 +79,14 @@ public class NoteService {
                 if (!label.equals(previousLabel)) {
                     // Create a new page
                     pdfDoc.newPage();
+                    pdfDoc.add(header);
+                    // Update label
                     previousLabel = label;
+                    // Add header at top of new page
                     Font font = FontFactory.getFont(FontFactory.TIMES_BOLD, 24, BaseColor.GREEN);
                     Chunk labelHeader = new Chunk(previousLabel, font);
                     pdfDoc.add(labelHeader);
                 }
-
-
 
                 // Add content to the page
                 PdfPTable table = new PdfPTable(2);
