@@ -51,7 +51,7 @@ public class ChatController {
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 
-    // /app/notes
+    // /app/new
     @MessageMapping("/new")
     @SendTo("/notes/unlabeled")
     public Note receiveUnsortedNote(@Payload Note note) {
@@ -61,7 +61,7 @@ public class ChatController {
     }
 
 
-    // /labeled/labelName
+    // /labeled
     @MessageMapping("/labeled")
     public Note receiveLabeledNote(@Payload Note note) {
         System.out.println("From receiveLabeledNote: " + note);
@@ -70,7 +70,7 @@ public class ChatController {
         return note;
     }
 
-    // /labeled/labelName/votedNote
+    // /labeled/vote
     @MessageMapping("/vote")
     public Vote receiveVotedNote(@Payload Vote vote) {
         Vote existingVote = voteService.handleVote(vote);

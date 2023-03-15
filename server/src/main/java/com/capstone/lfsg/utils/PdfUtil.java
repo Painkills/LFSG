@@ -13,7 +13,6 @@ import java.io.IOException;
 
 @Service
 public class PdfUtil {
-    private HeaderFooterUtil headFootUtil;
 
     public ByteArrayOutputStream createPDF(Iterable<Note> notes) throws BadElementException, IOException {
         // Get string for font
@@ -36,7 +35,12 @@ public class PdfUtil {
             // Iterate through the documents and generate a new page for each one
             String previousLabel = "";
             for (Note note : notes) {
-                if (note.getLabel() == null || note.getLabel().trim().equals("")) continue;
+                // Skip unlabeled notes
+                if (note.getLabel() == null) continue;
+
+                // Add table to hold notes
+                PdfPTable table = new PdfPTable(1);
+
                 // Group PDF by label
                 String label = (note.getLabel() != null)? note.getLabel() : "";
                 if (!label.equals(previousLabel)) {
@@ -48,15 +52,14 @@ public class PdfUtil {
 
                     // Add label at top of new page
                     Font labelFont = FontFactory.getFont(UncialAntiqua, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 24, 0, BaseColor.BLACK);
-                    Chunk labelHeader = new Chunk(previousLabel, labelFont);
-                    pdfDoc.add(labelHeader);
+                    PdfPCell labelCell = new PdfPCell(new Paragraph(previousLabel, labelFont));
+                    labelCell.setBorder(0);
+                    table.addCell(labelCell);
                 }
-                // Add table to hold notes
-                PdfPTable table = new PdfPTable(1);
-
                 // Add Note to the Table
                 Font noteFont = FontFactory.getFont(FontFactory.TIMES, 16, BaseColor.BLACK);
                 PdfPCell noteCell = new PdfPCell(new Paragraph(note.getMessage(), noteFont));
+                noteCell.setBorder(0);
                 table.addCell(noteCell);
 
                 // Add Note Taker Info to the Table
@@ -65,6 +68,7 @@ public class PdfUtil {
                         "Written By: " + note.getSenderName()
                                 + "\nAt: " + note.getCreatedAt().toString(),
                         noteTakerFont));
+                noteTakerCell.setBorder(0);
                 table.addCell(noteTakerCell);
 
                 // Add table to doc
