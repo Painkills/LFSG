@@ -1,7 +1,10 @@
 package com.capstone.lfsg.web;
 
 import com.capstone.lfsg.data.Note;
+import com.capstone.lfsg.data.Vote;
 import com.capstone.lfsg.service.NoteService;
+import com.capstone.lfsg.service.VoteService;
+import com.itextpdf.text.BadElementException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -26,16 +29,18 @@ public class ChatController {
 
     private final NoteService noteService;
     private final SimpMessagingTemplate messageTemplate;
+    private final VoteService voteService;
 
-    public ChatController(NoteService noteService, SimpMessagingTemplate messageTemplate) {
+    public ChatController(NoteService noteService, SimpMessagingTemplate messageTemplate, VoteService voteService) {
         this.noteService = noteService;
         this.messageTemplate = messageTemplate;
+        this.voteService = voteService;
     }
 
     // through GET /pdf
     @GetMapping("/pdf")
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<Resource> createPDF() throws IOException {
+    public ResponseEntity<Resource> createPDF() throws IOException, BadElementException {
         ByteArrayOutputStream out = noteService.makePDF();
         InputStream inputStream = new ByteArrayInputStream(out.toByteArray());
         HttpHeaders headers = new HttpHeaders();
@@ -65,5 +70,15 @@ public class ChatController {
         return note;
     }
 
+    // /labeled/labelName/votedNote
+    @MessageMapping("/vote")
+    public Vote receiveVotedNote(@Payload Vote vote) {
+        Vote existingVote = voteService.handleVote(vote);
+        if (existingVote != null) {
+            messageTemplate.convertAndSend("/votes/" + vote.getId(), existingVote);
+        }
+        // TODO: Frontend sends a vote, and if it receives a vote, it removes the upvote from it.
+        return existingVote;
+    }
 
 }
