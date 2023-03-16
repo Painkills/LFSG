@@ -54,7 +54,7 @@ public class NoteService {
 
     public ByteArrayOutputStream makePDF() throws BadElementException, IOException {
         // Query MongoDB to retrieve the documents you want to include in the PDF file
-        Iterable<Note> notes = noteRepo.findByOrderByLabelAsc();
+        Iterable<Note> notes = noteRepo.findByOrderByCreatedAt();
 
         // Create a new PDF document
         return pdfUtil.createPDF(notes);

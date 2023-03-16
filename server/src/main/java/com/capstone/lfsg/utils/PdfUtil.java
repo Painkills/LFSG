@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 @Service
 public class PdfUtil {
@@ -32,17 +33,44 @@ public class PdfUtil {
             // Open doc
             pdfDoc.open();
 
+            PdfPTable titleTable = new PdfPTable(1);
+
+            // Add title page
+            Font titleFont = FontFactory.getFont(UncialAntiqua, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 48, 0, BaseColor.BLACK);
+            PdfPCell titleCell = new PdfPCell(new Paragraph("Looking For Study Group", titleFont));
+            titleCell.setBorder(0);
+            titleCell.setHorizontalAlignment(1);
+            titleCell.setPaddingTop(30);
+            titleCell.setPaddingBottom(30);
+            titleTable.addCell(titleCell);
+
+            Font subtitleFont = FontFactory.getFont(UncialAntiqua, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 36, 0, BaseColor.BLACK);
+            PdfPCell subtitleCell = new PdfPCell(new Paragraph("Raid Notes", subtitleFont));
+            subtitleCell.setBorder(0);
+            subtitleCell.setHorizontalAlignment(1);
+            subtitleCell.setPaddingBottom(10);
+            titleTable.addCell(subtitleCell);
+
+            Font dateFont = FontFactory.getFont(UncialAntiqua, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 24, 0, BaseColor.BLACK);
+            PdfPCell dateCell = new PdfPCell(new Paragraph(java.time.LocalDate.now().toString(), dateFont));
+            dateCell.setBorder(0);
+            dateCell.setHorizontalAlignment(1);
+            titleTable.addCell(dateCell);
+
+            pdfDoc.add(titleTable);
+
             // Iterate through the documents and generate a new page for each one
             String previousLabel = "";
             for (Note note : notes) {
-                // Skip unlabeled notes
-                if (note.getLabel() == null) continue;
-
                 // Add table to hold notes
                 PdfPTable table = new PdfPTable(1);
 
+                // Skip unlabeled notes
+                if (note.getLabel() == null || note.getLabel().trim().equals("")) continue;
+
                 // Group PDF by label
-                String label = (note.getLabel() != null)? note.getLabel() : "";
+                String label = note.getLabel();
+                System.out.println("Label: " + label + " Created: " + note.getCreatedAt());
                 if (!label.equals(previousLabel)) {
                     // Create a new page
                     pdfDoc.newPage();
