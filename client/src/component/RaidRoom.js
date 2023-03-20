@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { over } from 'stompjs';
 import SockJS from 'sockjs-client';
+import OpenedNote from './OpenedNote'
 
 let stompClient =null;
 const RaidRoom = () => {
@@ -112,14 +113,23 @@ const RaidRoom = () => {
         }
     }
 
+    const [openNote, setOpenNote] = useState(false);
+    const [selectedNote, setSelectedNote] = useState(undefined);
+
+    const onSelectedNote = (index) => {
+        setSelectedNote(index);
+        setOpenNote(true);
+    }
+
     const labelNote = (index) => {
+        setOpenNote(false);
         let note = unlabeledNotes[index]
         let labelArray = userData.label.split(',')
         for (let index in labelArray) {
             note.label = labelArray[index];
             stompClient.send("/app/labeled", {}, JSON.stringify(note));
         }
-        setUserData({...userData,"label": ""});
+        setUserData({...userData, "label": ""});
     }
 
     const handleUsername=(event)=>{
@@ -305,11 +315,20 @@ const RaidRoom = () => {
                                 return (
                                 <li className={`message ${currentNote.senderName === userData.username && "self"}`} key={index}>
                                     {currentNote.senderName !== userData.username && <div className="avatar">{currentNote.senderName}</div>}
-                                    <div className="message-data">{currentNote.message}</div>
-                                    <div className="message-id">
-                                        <input type="text" className="message-id" placeholder="choose a label" value={userData.label} onChange={handleLabelInput}/>
-                                        <button type="button" className="mini-button" onClick={() => labelNote(index)}>Set</button>
-                                    </div>
+                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+                                    { (openNote === true && selectedNote === index) ? (
+                                        <OpenedNote trigger={openNote}>
+                                            <div className="message-data">{currentNote.message}</div>
+                                            <div className="message-id">
+                                                <input type="text" className="message-id" placeholder="choose a label" value={userData.label} onChange={handleLabelInput}/>
+                                                <button type="button" className="mini-button" onClick={() => labelNote(index)}>Set</button>
+                                                <div>
+                                                    <button type="button" className="mini-button" onClick={() => setOpenNote(false)}>Close</button>
+                                                </div>
+                                            </div>
+                                        </OpenedNote>
+                                        ) : null
+                                    }
                                     {currentNote.senderName === userData.username && <div className="avatar self">{currentNote.senderName}</div>}
                                 </li>
                             )})}
@@ -327,7 +346,16 @@ const RaidRoom = () => {
                             {[...labeledNotes.get(tab)].map((chat,index)=>(
                                 <li className={`message ${chat.senderName === userData.username && "self"}`} key={index}>
                                     {chat.senderName !== userData.username && <div className="avatar">{chat.senderName}</div>}
-                                    <div className="message-data">{chat.message}</div>
+                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+                                    { (openNote === true && selectedNote === index) ? (
+                                        <OpenedNote trigger={openNote}>
+                                            <div className="message-data">{chat.message}</div>
+                                            <div>
+                                                <button type="button" className="mini-button" onClick={() => setOpenNote(false)}>Close</button>
+                                            </div>
+                                        </OpenedNote>
+                                    ) : null
+                                    }
                                     {chat.senderName === userData.username && <div className="avatar self">{chat.senderName}</div>}
                                 </li>
                             ))}
