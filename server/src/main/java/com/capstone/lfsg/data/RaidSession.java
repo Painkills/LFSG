@@ -15,7 +15,7 @@ public class RaidSession {
     @Id
     private String id;
     private List<Student> participants;
-    private String label;
+    private List<String> labels;
     private List<Note> notes;
     private LocalDateTime createdAt;
 }
