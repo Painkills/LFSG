@@ -5,6 +5,8 @@ import OpenedNote from './OpenedNote'
 
 let stompClient =null;
 const RaidRoom = () => {
+    const [raidRoomId, setRaidRoomId] = useState(111);
+
     const [registerPage, setRegisterPage] = useState(false);
     const [labeledNotes, setLabeledNotes] = useState(new Map());
     const [unlabeledNotes, setUnlabeledNotes] = useState([]);
@@ -110,19 +112,12 @@ const RaidRoom = () => {
             let chatMessage = {
                 senderName: userData.username,
                 message: userData.message,
-                status:"MESSAGE"
+                status:"MESSAGE",
+                raidRoom: raidRoomId
             };
             stompClient.send("/app/new", {}, JSON.stringify(chatMessage));
             setUserData({...userData,"message": ""});
         }
-    }
-
-    const [openNote, setOpenNote] = useState(false);
-    const [selectedNote, setSelectedNote] = useState(undefined);
-
-    const onSelectedNote = (index) => {
-        setSelectedNote(index);
-        setOpenNote(true);
     }
 
     const labelNote = (index) => {
@@ -134,6 +129,14 @@ const RaidRoom = () => {
             stompClient.send("/app/labeled", {}, JSON.stringify(note));
         }
         setUserData({...userData, "label": ""});
+    }
+
+    const [openNote, setOpenNote] = useState(false);
+    const [selectedNote, setSelectedNote] = useState(undefined);
+
+    const onSelectedNote = (index) => {
+        setSelectedNote(index);
+        setOpenNote(true);
     }
 
     const handleUsername=(event)=>{
@@ -320,7 +323,7 @@ const RaidRoom = () => {
                                             return (
                                                 <li className={`message ${currentNote.senderName === userData.username && "self"}`} key={index}>
                                                     {currentNote.senderName !== userData.username && <div className="avatar">{currentNote.senderName}</div>}
-                                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+                                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button> {/*t*/}
                                                     { (openNote === true && selectedNote === index) ? (
                                                         <OpenedNote trigger={openNote}>
                                                             <div className="message-data">{currentNote.message}</div>
