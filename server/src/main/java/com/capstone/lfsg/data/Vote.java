@@ -17,5 +17,5 @@ public class Vote {
     private String noteId;
     private String label;
     private String studentId;
-    private String room;
+    private String roomId;
 }

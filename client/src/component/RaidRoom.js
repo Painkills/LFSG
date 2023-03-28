@@ -50,7 +50,7 @@ const RaidRoom = () => {
         setUserData({...userData,"connected": true});
         stompClient.subscribe('/notes/unlabeled', onNoteSubmitted);
         stompClient.subscribe('/notes/labeled/*', onNoteLabeled);
-        // userJoin();
+        userJoin();
     }
 
     const userJoin=()=>{

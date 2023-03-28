@@ -53,29 +53,29 @@ public class ChatController {
 
     // /app/new
     @MessageMapping("/new")
-    @SendTo("/notes/unlabeled")
-    public Note receiveUnsortedNote(@Payload Note note) {
+//    @SendTo("/notes/unlabeled")
+    public void receiveUnsortedNote(@Payload Note note) {
         System.out.println("From receiveUnsortedNote: " + note);
         noteService.saveNote(note);
-        return note;
+        this.messageTemplate.convertAndSend(note.getRoomId() + "/notes/unlabeled", note);
     }
 
 
-    // /labeled
+    // /app/labeled
     @MessageMapping("/labeled")
     public Note receiveLabeledNote(@Payload Note note) {
         System.out.println("From receiveLabeledNote: " + note);
         Note existingNote = noteService.labelNote(note.getId(), note.getLabel());
-        messageTemplate.convertAndSend("/notes/labeled/" + note.getLabel(), existingNote);
+        messageTemplate.convertAndSend(note.getRoomId() + "/notes/labeled/" + note.getLabel(), existingNote);
         return note;
     }
 
-    // /labeled/vote
+    // app/labeled/vote
     @MessageMapping("/vote")
     public Vote receiveVotedNote(@Payload Vote vote) {
         Vote existingVote = voteService.handleVote(vote);
         if (existingVote != null) {
-            messageTemplate.convertAndSend("/votes/" + vote.getId(), existingVote);
+            messageTemplate.convertAndSend(vote.getRoomId() + "/votes/" + vote.getId(), existingVote);
         }
         // TODO: Frontend sends a vote, and if it receives a vote, it removes the upvote from it.
         return existingVote;
