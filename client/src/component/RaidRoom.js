@@ -6,8 +6,8 @@ import {forEach} from "react-bootstrap/ElementChildren";
 
 let stompClient =null;
 const RaidRoom = () => {
+    // STATES
     const [raidRoomId, setRaidRoomId] = useState("112");
-
     const [registerPage, setRegisterPage] = useState(false);
     const [labeledNotes, setLabeledNotes] = useState(new Map());
     const [unlabeledNotes, setUnlabeledNotes] = useState([]);
@@ -18,7 +18,6 @@ const RaidRoom = () => {
         password: '',
         confirmPassword: ''
     });
-
     const [error, setError] = useState({
         name: '',
         email: '',
@@ -32,7 +31,6 @@ const RaidRoom = () => {
         connected: false,
         message: ''
     });
-
     const [userRole, setUserRole] = useState({
         role: 'none'
     });
@@ -41,6 +39,7 @@ const RaidRoom = () => {
     //     console.log(unlabeledNotes)
     // }, [unlabeledNotes]);
 
+    // CONNECTION
     const connect =()=>{
         let Sock = new SockJS('http://localhost:8082/ws');
         stompClient = over(Sock);
@@ -60,6 +59,7 @@ const RaidRoom = () => {
         stompClient.send("/app/join", {}, raidRoomId);
     }
 
+    // METHODS THAT HANDLE MESSAGES RECEIVED FROM SERVER
     const onNoteSubmitted = (payload)=>{
         let payloadData = JSON.parse(payload.body)
         switch(payloadData.status){
@@ -106,16 +106,7 @@ const RaidRoom = () => {
 
     }
 
-    const handleMessage =(event)=>{
-        const {value}=event.target;
-        setUserData({...userData,"message": value});
-    }
-
-    const handleLabelInput = (event) => {
-        const {value} = event.target;
-        setUserData({...userData, "label": value});
-    }
-
+    // METHODS THAT SEND THINGS TO SERVER
     const sendNote=()=>{
         if (stompClient) {
             let chatMessage = {
@@ -140,35 +131,7 @@ const RaidRoom = () => {
         setUserData({...userData, "label": ""});
     }
 
-    const [openNote, setOpenNote] = useState(false);
-    const [selectedNote, setSelectedNote] = useState(undefined);
-
-    const onSelectedNote = (index) => {
-        setSelectedNote(index);
-        setOpenNote(true);
-    }
-
-    const handleUsername=(event)=>{
-        const {value}=event.target;
-        setUserData({...userData,"username": value});
-    }
-    const handlePassword=(event)=>{
-        const {value}=event.target;
-        setUserData({...userData,"password": value});
-    }
-
-    const registerUser=()=>{
-        connect();
-    }
-
-    const onChangeRegisterPage=()=>{
-        if(registerPage === false){
-            setRegisterPage(true);
-        }else{
-            setRegisterPage(false)
-        }
-    }
-
+    // REQUEST PDF OF NOTES FROM SERVER
     const getPdf = () => {
         fetch('http://localhost:8082/pdf')
             .then(response => {
@@ -192,8 +155,48 @@ const RaidRoom = () => {
             });
     }
 
-//THIS ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // FORM HANDLING METHODS
+    const handleMessage =(event)=>{
+        const {value}=event.target;
+        setUserData({...userData,"message": value});
+    }
 
+    const handleLabelInput = (event) => {
+        const {value} = event.target;
+        setUserData({...userData, "label": value});
+    }
+
+    const [openNote, setOpenNote] = useState(false);
+
+    const [selectedNote, setSelectedNote] = useState(undefined);
+
+    const onSelectedNote = (index) => {
+        setSelectedNote(index);
+        setOpenNote(true);
+    }
+
+    // LOGIN METHODS
+    const handleUsername=(event)=>{
+        const {value}=event.target;
+        setUserData({...userData,"username": value});
+    }
+
+    const handlePassword=(event)=>{
+        const {value}=event.target;
+        setUserData({...userData,"password": value});
+    }
+
+    const registerUser=()=>{
+        connect();
+    }
+
+    const onChangeRegisterPage=()=>{
+        if(registerPage === false){
+            setRegisterPage(true);
+        }else{
+            setRegisterPage(false)
+        }
+    }
 
     const onInputChange = e => {
         const { name, value } = e.target;
@@ -247,6 +250,7 @@ const RaidRoom = () => {
         });
     }
 
+    // ===================== ACTUAL RENDERED PAGE BELOW THIS POINT ==================
     if(registerPage === true){
         function Validate() {
             if (input.password !== input.confirmPassword) {
