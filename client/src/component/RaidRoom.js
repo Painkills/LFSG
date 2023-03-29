@@ -5,19 +5,20 @@ import OpenedNote from './OpenedNote'
 
 let stompClient =null;
 const RaidRoom = () => {
-    const [raidRoomId, setRaidRoomId] = useState(111);
-
+    // STATES
+    const [raidRoomId, setRaidRoomId] = useState("112");
     const [registerPage, setRegisterPage] = useState(false);
     const [labeledNotes, setLabeledNotes] = useState(new Map());
     const [unlabeledNotes, setUnlabeledNotes] = useState([]);
     const [tab,setTab] = useState("UNLABELED");
-		const [input, setInput] = useState({
+    const [openNote, setOpenNote] = useState(false);
+    const [selectedNote, setSelectedNote] = useState(undefined);
+    const [input, setInput] = useState({
         name: '',
         email: '',
         password: '',
         confirmPassword: ''
     });
-
     const [error, setError] = useState({
         name: '',
         email: '',
@@ -31,15 +32,15 @@ const RaidRoom = () => {
         connected: false,
         message: ''
     });
-
     const [userRole, setUserRole] = useState({
         role: 'none'
     });
 
-    useEffect(() => {
-        console.log(unlabeledNotes)
-    }, [unlabeledNotes]);
+    // useEffect(() => {
+    //     console.log(unlabeledNotes)
+    // }, [unlabeledNotes]);
 
+    // CONNECTION
     const connect =()=>{
         let Sock = new SockJS('http://localhost:8082/ws');
         stompClient = over(Sock);
@@ -47,20 +48,21 @@ const RaidRoom = () => {
     }
 
     const onConnected = () => {
+        // placeholder to avoid empty username
+        const user = (userData.username === '')? 'Anonymous_User' : userData.username;
+
         setUserData({...userData,"connected": true});
-        stompClient.subscribe('/notes/unlabeled', onNoteSubmitted);
-        stompClient.subscribe('/notes/labeled/*', onNoteLabeled);
-        // userJoin();
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/unlabeled', onNoteSubmitted);
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/labeled/*', onNoteLabeled);
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/join/' + user, onJoined)
+        userJoin(user);
     }
 
-    const userJoin=()=>{
-        let chatMessage = {
-            senderName: userData.username,
-            status:"JOIN"
-        };
-        stompClient.send("/app/new", {}, JSON.stringify(chatMessage));
+    const userJoin=(user)=>{
+        stompClient.send("/app/join/" + raidRoomId, {}, user);
     }
 
+    // METHODS THAT HANDLE MESSAGES RECEIVED FROM SERVER
     const onNoteSubmitted = (payload)=>{
         let payloadData = JSON.parse(payload.body)
         switch(payloadData.status){
@@ -79,11 +81,42 @@ const RaidRoom = () => {
     }
 
     const onNoteLabeled = (payload)=>{
-        let payloadData = JSON.parse(payload.body);
-        setUnlabeledNotes(unlabeledNotes.filter((note) => note.id !== payloadData.id))
+        let payloadNote = JSON.parse(payload.body);
+
+        // set the label for the note in unlabeledNotes, which will make it not show up in that category.
+        unlabeledNotes.map((note) => {
+            if (note.id === payloadNote.id) {
+                note.label = payloadNote.label;
+            }
+        })
+
+        // If note has a label, add it to that label in labeledNotes
+        noteLabelHelper(payloadNote)
+    }
+
+    const onJoined = (payload) => {
+        const noteArray = JSON.parse(payload.body);
+        noteArray.forEach((note) => {
+            if (note.label != null) {
+                noteLabelHelper(note)
+            } else {
+                unlabeledNotes.push(note);
+                setUnlabeledNotes([...unlabeledNotes]);
+            }
+        })
+        console.log(unlabeledNotes)
+    }
+
+    const onError = (err) => {
+        console.log(err);
+
+    }
+
+    const noteLabelHelper = (payloadData) => {
         if(labeledNotes.get(payloadData.label)){
             labeledNotes.get(payloadData.label).push(payloadData);
             setLabeledNotes(new Map(labeledNotes));
+            // if not, create a new label key in labeledNotes and save it there
         }else{
             let list =[];
             list.push(payloadData);
@@ -92,28 +125,14 @@ const RaidRoom = () => {
         }
     }
 
-    const onError = (err) => {
-        console.log(err);
-
-    }
-
-    const handleMessage =(event)=>{
-        const {value}=event.target;
-        setUserData({...userData,"message": value});
-    }
-
-    const handleLabelInput = (event) => {
-        const {value} = event.target;
-        setUserData({...userData, "label": value});
-    }
-
+    // METHODS THAT SEND THINGS TO SERVER
     const sendNote=()=>{
         if (stompClient) {
             let chatMessage = {
                 senderName: userData.username,
                 message: userData.message,
                 status:"MESSAGE",
-                raidRoom: raidRoomId
+                roomId: raidRoomId
             };
             stompClient.send("/app/new", {}, JSON.stringify(chatMessage));
             setUserData({...userData,"message": ""});
@@ -131,35 +150,7 @@ const RaidRoom = () => {
         setUserData({...userData, "label": ""});
     }
 
-    const [openNote, setOpenNote] = useState(false);
-    const [selectedNote, setSelectedNote] = useState(undefined);
-
-    const onSelectedNote = (index) => {
-        setSelectedNote(index);
-        setOpenNote(true);
-    }
-
-    const handleUsername=(event)=>{
-        const {value}=event.target;
-        setUserData({...userData,"username": value});
-    }
-    const handlePassword=(event)=>{
-        const {value}=event.target;
-        setUserData({...userData,"password": value});
-    }
-
-    const registerUser=()=>{
-        connect();
-    }
-
-    const onChangeRegisterPage=()=>{
-        if(registerPage === false){
-            setRegisterPage(true);
-        }else{
-            setRegisterPage(false)
-        }
-    }
-
+    // REQUEST PDF OF NOTES FROM SERVER
     const getPdf = () => {
         fetch('http://localhost:8082/pdf')
             .then(response => {
@@ -183,8 +174,44 @@ const RaidRoom = () => {
             });
     }
 
-//THIS ->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    // FORM HANDLING METHODS
+    const handleMessage =(event)=>{
+        const {value}=event.target;
+        setUserData({...userData,"message": value});
+    }
 
+    const handleLabelInput = (event) => {
+        const {value} = event.target;
+        setUserData({...userData, "label": value});
+    }
+
+    const onSelectedNote = (index) => {
+        setSelectedNote(index);
+        setOpenNote(true);
+    }
+
+    // LOGIN METHODS
+    const handleUsername=(event)=>{
+        const {value} = event.target;
+        setUserData({...userData,"username": value});
+    }
+
+    const handlePassword=(event)=>{
+        const {value}=event.target;
+        setUserData({...userData,"password": value});
+    }
+
+    const registerUser=()=>{
+        connect();
+    }
+
+    const onChangeRegisterPage=()=>{
+        if(registerPage === false){
+            setRegisterPage(true);
+        }else{
+            setRegisterPage(false)
+        }
+    }
 
     const onInputChange = e => {
         const { name, value } = e.target;
@@ -238,6 +265,7 @@ const RaidRoom = () => {
         });
     }
 
+    // ===================== ACTUAL RENDERED PAGE BELOW THIS POINT ==================
     if(registerPage === true){
         function Validate() {
             if (input.password !== input.confirmPassword) {
@@ -323,7 +351,11 @@ const RaidRoom = () => {
                                             return (
                                                 <li className={`message ${currentNote.senderName === userData.username && "self"}`} key={index}>
                                                     {currentNote.senderName !== userData.username && <div className="avatar">{currentNote.senderName}</div>}
-                                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button> {/*t*/}
+                                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+
+                                                    {/*Placeholder so I can see what is in these*/}
+                                                    <div className="message-data">{currentNote.message}</div>
+
                                                     { (openNote === true && selectedNote === index) ? (
                                                         <OpenedNote trigger={openNote}>
                                                             <div className="message-data">{currentNote.message}</div>
@@ -363,20 +395,24 @@ const RaidRoom = () => {
                                 {/* Labeled notes box */}
                                 {tab!=="UNLABELED" && <div className="chat-content">
                                     <ul className="chat-messages">
-                                        {[...labeledNotes.get(tab)].map((chat,index)=>(
-                                            <li className={`message ${chat.senderName === userData.username && "self"}`} key={index}>
-                                                {chat.senderName !== userData.username && <div className="avatar">{chat.senderName}</div>}
+                                        {[...labeledNotes.get(tab)].map((note,index)=>(
+                                            <li className={`message ${note.senderName === userData.username && "self"}`} key={index}>
+                                                {note.senderName !== userData.username && <div className="avatar">{note.senderName}</div>}
                                                 <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+
+                                                {/*Placeholder so I can see what is in these*/}
+                                                <div className="message-data">{note.message}</div>
+
                                                 { (openNote === true && selectedNote === index) ? (
                                                     <OpenedNote trigger={openNote}>
-                                                        <div className="message-data">{chat.message}</div>
+                                                        <div className="message-data">{note.message}</div>
                                                         <div>
                                                             <button type="button" className="mini-button" onClick={() => setOpenNote(false)}>Close</button>
                                                         </div>
                                                     </OpenedNote>
                                                 ) : null
                                                 }
-                                                {chat.senderName === userData.username && <div className="avatar self">{chat.senderName}</div>}
+                                                {note.senderName === userData.username && <div className="avatar self">{note.senderName}</div>}
                                             </li>
                                         ))}
                                     </ul>
@@ -400,7 +436,7 @@ const RaidRoom = () => {
                             id="user-name"
                             placeholder="Enter your name"
                             name="userName"
-                            value={userData.username}
+                            value= {userData.username}
                             onChange={handleUsername}
                         />
                         <input

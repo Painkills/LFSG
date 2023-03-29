@@ -44,9 +44,9 @@ public class NoteService {
         }
     }
 
-    public Iterable<Note> getAllNotes(){
+    public Iterable<Note> getAllNotesByRoom(String room){
         try {
-            return noteRepo.findAll();
+            return noteRepo.findByRoomId(room);
         } catch (Exception e) {
             return null;
         }

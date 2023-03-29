@@ -5,12 +5,14 @@ import com.capstone.lfsg.data.Vote;
 import com.capstone.lfsg.service.NoteService;
 import com.capstone.lfsg.service.VoteService;
 import com.itextpdf.text.BadElementException;
+import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -18,11 +20,14 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import javax.websocket.server.PathParam;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 @Controller
 public class ChatController {
@@ -51,31 +56,42 @@ public class ChatController {
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 
+
+    // /app/join
+    @MessageMapping("/join/{roomId}")
+    public void getNotesInRoom(@DestinationVariable String roomId, @Payload String username) {
+        System.out.println(roomId + username);
+        Iterable<Note> notesInRoom = noteService.getAllNotesByRoom(roomId);
+        System.out.println("/room/" + roomId + "/notes/join/" + username);
+        messageTemplate.convertAndSend("/room/" + roomId + "/notes/join/" + username, notesInRoom);
+    }
+
     // /app/new
     @MessageMapping("/new")
-    @SendTo("/notes/unlabeled")
-    public Note receiveUnsortedNote(@Payload Note note) {
+//    @SendTo("/notes/unlabeled")
+    public void receiveUnsortedNote(@Payload Note note) {
         System.out.println("From receiveUnsortedNote: " + note);
         noteService.saveNote(note);
-        return note;
+        messageTemplate.convertAndSend("/room/" + note.getRoomId() + "/notes/unlabeled", note);
+//        messageTemplate.convertAndSend("/notes/unlabeled", note);
     }
 
 
-    // /labeled
+    // /app/labeled
     @MessageMapping("/labeled")
     public Note receiveLabeledNote(@Payload Note note) {
         System.out.println("From receiveLabeledNote: " + note);
         Note existingNote = noteService.labelNote(note.getId(), note.getLabel());
-        messageTemplate.convertAndSend("/notes/labeled/" + note.getLabel(), existingNote);
+        messageTemplate.convertAndSend("/room/" + note.getRoomId() + "/notes/labeled/" + note.getLabel(), existingNote);
         return note;
     }
 
-    // /labeled/vote
+    // app/labeled/vote
     @MessageMapping("/vote")
     public Vote receiveVotedNote(@Payload Vote vote) {
         Vote existingVote = voteService.handleVote(vote);
         if (existingVote != null) {
-            messageTemplate.convertAndSend("/votes/" + vote.getId(), existingVote);
+            messageTemplate.convertAndSend("/room/" + vote.getRoomId() + "/votes/" + vote.getId(), existingVote);
         }
         // TODO: Frontend sends a vote, and if it receives a vote, it removes the upvote from it.
         return existingVote;
