@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -19,7 +20,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import javax.websocket.server.PathParam;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -55,10 +58,12 @@ public class ChatController {
 
 
     // /app/join
-    @MessageMapping("/join")
-    public void getNotesInRoom(@Payload String roomId) {
+    @MessageMapping("/join/{roomId}")
+    public void getNotesInRoom(@DestinationVariable String roomId, @Payload String username) {
+        System.out.println(roomId + username);
         Iterable<Note> notesInRoom = noteService.getAllNotesByRoom(roomId);
-        messageTemplate.convertAndSend("/room/" + roomId + "/notes/join", notesInRoom);
+        System.out.println("/room/" + roomId + "/notes/join/" + username);
+        messageTemplate.convertAndSend("/room/" + roomId + "/notes/join/" + username, notesInRoom);
     }
 
     // /app/new

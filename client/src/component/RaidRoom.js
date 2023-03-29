@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { over } from 'stompjs';
 import SockJS from 'sockjs-client';
 import OpenedNote from './OpenedNote'
-import {forEach} from "react-bootstrap/ElementChildren";
 
 let stompClient =null;
 const RaidRoom = () => {
@@ -12,6 +11,8 @@ const RaidRoom = () => {
     const [labeledNotes, setLabeledNotes] = useState(new Map());
     const [unlabeledNotes, setUnlabeledNotes] = useState([]);
     const [tab,setTab] = useState("UNLABELED");
+    const [openNote, setOpenNote] = useState(false);
+    const [selectedNote, setSelectedNote] = useState(undefined);
     const [input, setInput] = useState({
         name: '',
         email: '',
@@ -47,16 +48,18 @@ const RaidRoom = () => {
     }
 
     const onConnected = () => {
+        // placeholder to avoid empty username
+        const user = (userData.username === '')? 'Anonymous_User' : userData.username;
+
         setUserData({...userData,"connected": true});
-        // stompClient.subscribe('/notes/unlabeled', onNoteSubmitted);
         stompClient.subscribe('/room/' + raidRoomId + '/notes/unlabeled', onNoteSubmitted);
         stompClient.subscribe('/room/' + raidRoomId + '/notes/labeled/*', onNoteLabeled);
-        stompClient.subscribe('/room/' + raidRoomId + '/notes/join', onJoined)
-        userJoin();
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/join/' + user, onJoined)
+        userJoin(user);
     }
 
-    const userJoin=()=>{
-        stompClient.send("/app/join", {}, raidRoomId);
+    const userJoin=(user)=>{
+        stompClient.send("/app/join/" + raidRoomId, {}, user);
     }
 
     // METHODS THAT HANDLE MESSAGES RECEIVED FROM SERVER
@@ -78,25 +81,28 @@ const RaidRoom = () => {
     }
 
     const onNoteLabeled = (payload)=>{
-        let payloadData = JSON.parse(payload.body);
-        setUnlabeledNotes(unlabeledNotes.filter((note) => note.id !== payloadData.id))
-        if(labeledNotes.get(payloadData.label)){
-            labeledNotes.get(payloadData.label).push(payloadData);
-            setLabeledNotes(new Map(labeledNotes));
-        }else{
-            let list =[];
-            list.push(payloadData);
-            labeledNotes.set(payloadData.label, list);
-            setLabeledNotes(new Map(labeledNotes));
-        }
+        let payloadNote = JSON.parse(payload.body);
+
+        // set the label for the note in unlabeledNotes, which will make it not show up in that category.
+        unlabeledNotes.map((note) => {
+            if (note.id === payloadNote.id) {
+                note.label = payloadNote.label;
+            }
+        })
+
+        // If note has a label, add it to that label in labeledNotes
+        noteLabelHelper(payloadNote)
     }
 
     const onJoined = (payload) => {
         const noteArray = JSON.parse(payload.body);
-        console.log(typeof(noteArray))
         noteArray.forEach((note) => {
-            unlabeledNotes.push(note);
-            setUnlabeledNotes([...unlabeledNotes]);
+            if (note.label != null) {
+                noteLabelHelper(note)
+            } else {
+                unlabeledNotes.push(note);
+                setUnlabeledNotes([...unlabeledNotes]);
+            }
         })
         console.log(unlabeledNotes)
     }
@@ -104,6 +110,19 @@ const RaidRoom = () => {
     const onError = (err) => {
         console.log(err);
 
+    }
+
+    const noteLabelHelper = (payloadData) => {
+        if(labeledNotes.get(payloadData.label)){
+            labeledNotes.get(payloadData.label).push(payloadData);
+            setLabeledNotes(new Map(labeledNotes));
+            // if not, create a new label key in labeledNotes and save it there
+        }else{
+            let list =[];
+            list.push(payloadData);
+            labeledNotes.set(payloadData.label, list);
+            setLabeledNotes(new Map(labeledNotes));
+        }
     }
 
     // METHODS THAT SEND THINGS TO SERVER
@@ -166,10 +185,6 @@ const RaidRoom = () => {
         setUserData({...userData, "label": value});
     }
 
-    const [openNote, setOpenNote] = useState(false);
-
-    const [selectedNote, setSelectedNote] = useState(undefined);
-
     const onSelectedNote = (index) => {
         setSelectedNote(index);
         setOpenNote(true);
@@ -177,7 +192,7 @@ const RaidRoom = () => {
 
     // LOGIN METHODS
     const handleUsername=(event)=>{
-        const {value}=event.target;
+        const {value} = event.target;
         setUserData({...userData,"username": value});
     }
 
@@ -336,7 +351,11 @@ const RaidRoom = () => {
                                             return (
                                                 <li className={`message ${currentNote.senderName === userData.username && "self"}`} key={index}>
                                                     {currentNote.senderName !== userData.username && <div className="avatar">{currentNote.senderName}</div>}
-                                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button> {/*t*/}
+                                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+
+                                                    {/*Placeholder so I can see what is in these*/}
+                                                    <div className="message-data">{currentNote.message}</div>
+
                                                     { (openNote === true && selectedNote === index) ? (
                                                         <OpenedNote trigger={openNote}>
                                                             <div className="message-data">{currentNote.message}</div>
@@ -376,20 +395,24 @@ const RaidRoom = () => {
                                 {/* Labeled notes box */}
                                 {tab!=="UNLABELED" && <div className="chat-content">
                                     <ul className="chat-messages">
-                                        {[...labeledNotes.get(tab)].map((chat,index)=>(
-                                            <li className={`message ${chat.senderName === userData.username && "self"}`} key={index}>
-                                                {chat.senderName !== userData.username && <div className="avatar">{chat.senderName}</div>}
+                                        {[...labeledNotes.get(tab)].map((note,index)=>(
+                                            <li className={`message ${note.senderName === userData.username && "self"}`} key={index}>
+                                                {note.senderName !== userData.username && <div className="avatar">{note.senderName}</div>}
                                                 <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+
+                                                {/*Placeholder so I can see what is in these*/}
+                                                <div className="message-data">{note.message}</div>
+
                                                 { (openNote === true && selectedNote === index) ? (
                                                     <OpenedNote trigger={openNote}>
-                                                        <div className="message-data">{chat.message}</div>
+                                                        <div className="message-data">{note.message}</div>
                                                         <div>
                                                             <button type="button" className="mini-button" onClick={() => setOpenNote(false)}>Close</button>
                                                         </div>
                                                     </OpenedNote>
                                                 ) : null
                                                 }
-                                                {chat.senderName === userData.username && <div className="avatar self">{chat.senderName}</div>}
+                                                {note.senderName === userData.username && <div className="avatar self">{note.senderName}</div>}
                                             </li>
                                         ))}
                                     </ul>
@@ -413,7 +436,7 @@ const RaidRoom = () => {
                             id="user-name"
                             placeholder="Enter your name"
                             name="userName"
-                            value={userData.username}
+                            value= {userData.username}
                             onChange={handleUsername}
                         />
                         <input
