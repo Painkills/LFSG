@@ -5,6 +5,7 @@ import com.capstone.lfsg.data.Vote;
 import com.capstone.lfsg.service.NoteService;
 import com.capstone.lfsg.service.VoteService;
 import com.itextpdf.text.BadElementException;
+import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 @Controller
 public class ChatController {
@@ -51,13 +53,22 @@ public class ChatController {
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 
+
+    // /app/join
+    @MessageMapping("/join")
+    public void getNotesInRoom(@Payload String roomId) {
+        Iterable<Note> notesInRoom = noteService.getAllNotesByRoom(roomId);
+        messageTemplate.convertAndSend("/room/" + roomId + "/notes/join", notesInRoom);
+    }
+
     // /app/new
     @MessageMapping("/new")
 //    @SendTo("/notes/unlabeled")
     public void receiveUnsortedNote(@Payload Note note) {
         System.out.println("From receiveUnsortedNote: " + note);
         noteService.saveNote(note);
-        this.messageTemplate.convertAndSend(note.getRoomId() + "/notes/unlabeled", note);
+        messageTemplate.convertAndSend("/room/" + note.getRoomId() + "/notes/unlabeled", note);
+//        messageTemplate.convertAndSend("/notes/unlabeled", note);
     }
 
 
@@ -66,7 +77,7 @@ public class ChatController {
     public Note receiveLabeledNote(@Payload Note note) {
         System.out.println("From receiveLabeledNote: " + note);
         Note existingNote = noteService.labelNote(note.getId(), note.getLabel());
-        messageTemplate.convertAndSend(note.getRoomId() + "/notes/labeled/" + note.getLabel(), existingNote);
+        messageTemplate.convertAndSend("/room/" + note.getRoomId() + "/notes/labeled/" + note.getLabel(), existingNote);
         return note;
     }
 
@@ -75,7 +86,7 @@ public class ChatController {
     public Vote receiveVotedNote(@Payload Vote vote) {
         Vote existingVote = voteService.handleVote(vote);
         if (existingVote != null) {
-            messageTemplate.convertAndSend(vote.getRoomId() + "/votes/" + vote.getId(), existingVote);
+            messageTemplate.convertAndSend("/room/" + vote.getRoomId() + "/votes/" + vote.getId(), existingVote);
         }
         // TODO: Frontend sends a vote, and if it receives a vote, it removes the upvote from it.
         return existingVote;

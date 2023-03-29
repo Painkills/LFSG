@@ -15,9 +15,9 @@ public class VoteService {
     }
 
     public Vote handleVote(Vote vote) {
-        if (voteRepo.existsByRoomAndStudentIdAndLabel(vote.getRoom(), vote.getStudentId(), vote.getLabel())) {
+        if (voteRepo.existsByRoomIdAndStudentIdAndLabel(vote.getRoomId(), vote.getStudentId(), vote.getLabel())) {
             try {
-                Vote existingVote = voteRepo.findByRoomAndStudentIdAndLabel(vote.getRoom(), vote.getStudentId(), vote.getLabel())
+                Vote existingVote = voteRepo.findByRoomIdAndStudentIdAndLabel(vote.getRoomId(), vote.getStudentId(), vote.getLabel())
                         .orElseThrow(() -> new Exception("Vote not found."));
 
                 // save the current one

@@ -2,16 +2,17 @@ import React, { useEffect, useState } from 'react'
 import { over } from 'stompjs';
 import SockJS from 'sockjs-client';
 import OpenedNote from './OpenedNote'
+import {forEach} from "react-bootstrap/ElementChildren";
 
 let stompClient =null;
 const RaidRoom = () => {
-    const [raidRoomId, setRaidRoomId] = useState(111);
+    const [raidRoomId, setRaidRoomId] = useState("112");
 
     const [registerPage, setRegisterPage] = useState(false);
     const [labeledNotes, setLabeledNotes] = useState(new Map());
     const [unlabeledNotes, setUnlabeledNotes] = useState([]);
     const [tab,setTab] = useState("UNLABELED");
-		const [input, setInput] = useState({
+    const [input, setInput] = useState({
         name: '',
         email: '',
         password: '',
@@ -36,9 +37,9 @@ const RaidRoom = () => {
         role: 'none'
     });
 
-    useEffect(() => {
-        console.log(unlabeledNotes)
-    }, [unlabeledNotes]);
+    // useEffect(() => {
+    //     console.log(unlabeledNotes)
+    // }, [unlabeledNotes]);
 
     const connect =()=>{
         let Sock = new SockJS('http://localhost:8082/ws');
@@ -48,17 +49,15 @@ const RaidRoom = () => {
 
     const onConnected = () => {
         setUserData({...userData,"connected": true});
-        stompClient.subscribe('/notes/unlabeled', onNoteSubmitted);
-        stompClient.subscribe('/notes/labeled/*', onNoteLabeled);
+        // stompClient.subscribe('/notes/unlabeled', onNoteSubmitted);
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/unlabeled', onNoteSubmitted);
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/labeled/*', onNoteLabeled);
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/join', onJoined)
         userJoin();
     }
 
     const userJoin=()=>{
-        let chatMessage = {
-            senderName: userData.username,
-            status:"JOIN"
-        };
-        stompClient.send("/app/new", {}, JSON.stringify(chatMessage));
+        stompClient.send("/app/join", {}, raidRoomId);
     }
 
     const onNoteSubmitted = (payload)=>{
@@ -92,6 +91,16 @@ const RaidRoom = () => {
         }
     }
 
+    const onJoined = (payload) => {
+        const noteArray = JSON.parse(payload.body);
+        console.log(typeof(noteArray))
+        noteArray.forEach((note) => {
+            unlabeledNotes.push(note);
+            setUnlabeledNotes([...unlabeledNotes]);
+        })
+        console.log(unlabeledNotes)
+    }
+
     const onError = (err) => {
         console.log(err);
 
@@ -113,7 +122,7 @@ const RaidRoom = () => {
                 senderName: userData.username,
                 message: userData.message,
                 status:"MESSAGE",
-                raidRoom: raidRoomId
+                roomId: raidRoomId
             };
             stompClient.send("/app/new", {}, JSON.stringify(chatMessage));
             setUserData({...userData,"message": ""});
