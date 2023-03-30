@@ -1,5 +1,5 @@
 import React from 'react'
-import RaidRoom from './component/MainScreen'
+import MainScreen from "./component/MainScreen";
 
 const App = () => {
   return (
