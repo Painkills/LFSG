@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -52,11 +55,20 @@ public class NoteService {
         }
     }
 
-    public ByteArrayOutputStream makePDF() throws BadElementException, IOException {
+    public ByteArrayOutputStream makePDF(String room) throws BadElementException, IOException {
         // Query MongoDB to retrieve the documents you want to include in the PDF file
-        Iterable<Note> notes = noteRepo.findByOrderByCreatedAt();
+        Iterable<Note> notes = noteRepo.findByRoomIdOrderByGoldDesc(room);
 
+        // Only get the highest voted note for each category
+        List<Note> filteredNotes = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        for (Note note : notes) {
+            if (!labels.contains(note.getLabel())) {
+                labels.add(note.getLabel());
+                filteredNotes.add(note);
+            }
+        }
         // Create a new PDF document
-        return pdfUtil.createPDF(notes);
+        return pdfUtil.createPDF(filteredNotes);
     }
 }

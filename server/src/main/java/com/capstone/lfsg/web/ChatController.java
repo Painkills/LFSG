@@ -43,10 +43,10 @@ public class ChatController {
     }
 
     // through GET /pdf
-    @GetMapping("/pdf")
+    @GetMapping("/pdf/{room}")
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<Resource> createPDF() throws IOException, BadElementException {
-        ByteArrayOutputStream out = noteService.makePDF();
+    public ResponseEntity<Resource> createPDF(@PathVariable("room") String room) throws IOException, BadElementException {
+        ByteArrayOutputStream out = noteService.makePDF(room);
         InputStream inputStream = new ByteArrayInputStream(out.toByteArray());
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; output.pdf");

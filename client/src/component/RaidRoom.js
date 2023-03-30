@@ -152,7 +152,7 @@ const RaidRoom = () => {
 
     // REQUEST PDF OF NOTES FROM SERVER
     const getPdf = () => {
-        fetch('http://localhost:8082/pdf')
+        fetch('http://localhost:8082/pdf/' + raidRoomId)
             .then(response => {
                 const contentDisposition = response.headers.get('Content-Disposition');
                 const filenameMatch = contentDisposition ? contentDisposition.match(/filename="(.+)"/) : null;
