@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { over } from 'stompjs';
 import SockJS from 'sockjs-client';
-import RaidRoom from './component/RaidRoom'
+import RaidRoom from './RaidRoom'
 
 let stompClient =null;
 
