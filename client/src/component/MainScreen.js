@@ -33,6 +33,30 @@ const MainScreen = () => {
         setUserData({...userData,"password": value});
     }
 
+    const handleUsername=(event)=>{
+        const {value} = event.target;
+        setUserData({...userData,"username": value});
+    }
+
+    const connect =()=>{
+        let Sock = new SockJS('http://localhost:8082/ws');
+        stompClient = over(Sock);
+        stompClient.connect({},onConnected, onError);
+    }
+
+    const onConnected = () => {
+
+    }
+
+    const onError = (err) => {
+        console.log(err);
+
+    }
+
+    const registerUser=()=>{
+        connect();
+    }
+
     const onChangeRegisterPage=()=>{
         if(registerPage === false){
             setRegisterPage(true);
@@ -149,6 +173,33 @@ const MainScreen = () => {
 
                     <button onClick={Validate}>Submit</button>
                 </form>
+            </div>
+        )
+    }
+    if(registerPage === false) {
+        return(
+            <div className="register">
+                <input
+                    id="user-name"
+                    placeholder="Enter your name"
+                    name="userName"
+                    value= {userData.username}
+                    onChange={handleUsername}
+                />
+                <input
+                    id="user-pass"
+                    placeholder="Enter your password"
+                    name="password"
+                    value={userData.password}
+                    onChange={handlePassword}
+                />
+
+                <button type="button" onClick={registerUser}>
+                    Sign in
+                </button>
+                <button type="button" onClick={onChangeRegisterPage}>
+                    Register
+                </button>
             </div>
         )
     }
