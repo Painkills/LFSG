@@ -328,135 +328,133 @@ const RaidRoom = () => {
     if (registerPage === false) {
         return (
             // Raid Room Area
-        <div className="container">
-            {userData.connected? // If the user IS connected...
+            <div className="container">
+                {userData.connected? // If the user IS connected...
 
-                <div>
-                    { (userRole.role === 'labeler' || userRole.role === 'notetaker') ? (
-                            <div className="chat-box">
-                                <div className="member-list">
-                                    <ul>
-                                        <li onClick={()=>{setTab("UNLABELED")}} className={`member ${tab==="UNLABELED" && "active"}`}>Unlabeled</li>
-                                        {[...labeledNotes.keys()].map((name,index)=>(
-                                            <li onClick={()=>{setTab(name)}} className={`member ${tab===name && "active"}`} key={index}>Label: {name}</li>
-                                        ))}
-                                    </ul>
-                                </div>
+                    <div>
+                        { (userRole.role === 'labeler' || userRole.role === 'notetaker') ? (
+                                <div className="chat-box">
+                                    <div className="member-list">
+                                        <ul>
+                                            <li onClick={()=>{setTab("UNLABELED")}} className={`member ${tab==="UNLABELED" && "active"}`}>Unlabeled</li>
+                                            {[...labeledNotes.keys()].map((name,index)=>(
+                                                <li onClick={()=>{setTab(name)}} className={`member ${tab===name && "active"}`} key={index}>Label: {name}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
 
-                                {/* Unlabelled notes box */}
-                                {tab==="UNLABELED" && <div className="chat-content">
-                                    <ul className="chat-messages">
-                                        {unlabeledNotes.map((currentNote,index) => {
-                                            if (currentNote.label !== null) return null;
-                                            return (
-                                                <li className={`message ${currentNote.senderName === userData.username && "self"}`} key={index}>
-                                                    {currentNote.senderName !== userData.username && <div className="avatar">{currentNote.senderName}</div>}
+                                    {/* Unlabelled notes box */}
+                                    {tab==="UNLABELED" && <div className="chat-content">
+                                        <ul className="chat-messages">
+                                            {unlabeledNotes.map((currentNote,index) => {
+                                                if (currentNote.label !== null) return null;
+                                                return (
+                                                    <li className={`message ${currentNote.senderName === userData.username && "self"}`} key={index}>
+                                                        {currentNote.senderName !== userData.username && <div className="avatar">{currentNote.senderName}</div>}
+                                                        <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+
+                                                        {/*Placeholder so I can see what is in these*/}
+                                                        <div className="message-data">{currentNote.message}</div>
+
+                                                        { (openNote === true && selectedNote === index) ? (
+                                                            <OpenedNote trigger={openNote}>
+                                                                <div className="message-data">{currentNote.message}</div>
+                                                                <div className="message-id">
+                                                                    { (userRole.role === 'labeler') ? (
+                                                                        <div>
+                                                                            <input type="text" className="message-id" placeholder="choose a label" value={userData.label} onChange={handleLabelInput}/>
+                                                                            <button type="button" className="mini-button" onClick={() => labelNote(index)}>Set</button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div>
+                                                                            <p>Vote Placeholder</p>
+                                                                        </div>
+                                                                    )
+                                                                    }
+                                                                    <div>
+                                                                        <button type="button" className="mini-button" onClick={() => setOpenNote(false)}>Close</button>
+                                                                    </div>
+                                                                </div>
+                                                            </OpenedNote>
+                                                        ) : null
+                                                        }
+                                                        {currentNote.senderName === userData.username && <div className="avatar self">{currentNote.senderName}</div>}
+                                                    </li>
+                                                )})}
+                                        </ul>
+                                        {/* Enter message and send */}
+                                        { (userRole.role === 'notetaker') ? (
+                                                <div className="send-message">
+                                                    <input type="text" className="input-message" placeholder="enter the message" value={userData.message} onChange={handleMessage} />
+                                                    <button type="button" className="send-button" onClick={sendNote}>Submit</button>
+                                                </div>
+                                            ) : null
+                                        }
+                                    </div>}
+
+                                    {/* Labeled notes box */}
+                                    {tab!=="UNLABELED" && <div className="chat-content">
+                                        <ul className="chat-messages">
+                                            {[...labeledNotes.get(tab)].map((note,index)=>(
+                                                <li className={`message ${note.senderName === userData.username && "self"}`} key={index}>
+                                                    {note.senderName !== userData.username && <div className="avatar">{note.senderName}</div>}
                                                     <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
 
                                                     {/*Placeholder so I can see what is in these*/}
-                                                    <div className="message-data">{currentNote.message}</div>
+                                                    <div className="message-data">{note.message}</div>
 
                                                     { (openNote === true && selectedNote === index) ? (
                                                         <OpenedNote trigger={openNote}>
-                                                            <div className="message-data">{currentNote.message}</div>
-                                                            <div className="message-id">
-                                                                { (userRole.role === 'labeler') ? (
-                                                                    <div>
-                                                                        <input type="text" className="message-id" placeholder="choose a label" value={userData.label} onChange={handleLabelInput}/>
-                                                                        <button type="button" className="mini-button" onClick={() => labelNote(index)}>Set</button>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div>
-                                                                        <p>Vote Placeholder</p>
-                                                                    </div>
-                                                                )
-                                                                }
-                                                                <div>
-                                                                    <button type="button" className="mini-button" onClick={() => setOpenNote(false)}>Close</button>
-                                                                </div>
+                                                            <div className="message-data">{note.message}</div>
+                                                            <div>
+                                                                <button type="button" className="mini-button" onClick={() => setOpenNote(false)}>Close</button>
                                                             </div>
                                                         </OpenedNote>
                                                     ) : null
                                                     }
-                                                    {currentNote.senderName === userData.username && <div className="avatar self">{currentNote.senderName}</div>}
+                                                    {note.senderName === userData.username && <div className="avatar self">{note.senderName}</div>}
                                                 </li>
-                                            )})}
-                                    </ul>
-                                    {/* Enter message and send */}
-                                    { (userRole.role === 'notetaker') ? (
-                                            <div className="send-message">
-                                                <input type="text" className="input-message" placeholder="enter the message" value={userData.message} onChange={handleMessage} />
-                                                <button type="button" className="send-button" onClick={sendNote}>Submit</button>
-                                            </div>
-                                        ) : null
-                                    }
-                                </div>}
-
-                                {/* Labeled notes box */}
-                                {tab!=="UNLABELED" && <div className="chat-content">
-                                    <ul className="chat-messages">
-                                        {[...labeledNotes.get(tab)].map((note,index)=>(
-                                            <li className={`message ${note.senderName === userData.username && "self"}`} key={index}>
-                                                {note.senderName !== userData.username && <div className="avatar">{note.senderName}</div>}
-                                                <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
-
-                                                {/*Placeholder so I can see what is in these*/}
-                                                <div className="message-data">{note.message}</div>
-
-                                                { (openNote === true && selectedNote === index) ? (
-                                                    <OpenedNote trigger={openNote}>
-                                                        <div className="message-data">{note.message}</div>
-                                                        <div>
-                                                            <button type="button" className="mini-button" onClick={() => setOpenNote(false)}>Close</button>
-                                                        </div>
-                                                    </OpenedNote>
-                                                ) : null
-                                                }
-                                                {note.senderName === userData.username && <div className="avatar self">{note.senderName}</div>}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>}
-                                <div>
-                                    <button type="button" className="send-button" onClick={getPdf}>getPDF</button>
+                                            ))}
+                                        </ul>
+                                    </div>}
+                                    <div>
+                                        <button type="button" className="send-button" onClick={getPdf}>getPDF</button>
+                                    </div>
                                 </div>
+                            ) :
+                            <div>
+                                <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}>Note Taker</button>
+                                <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'labeler'})}>Labeler</button>
                             </div>
-                        ) :
-                        <div>
-                            <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}>Note Taker</button>
-                            <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'labeler'})}>Labeler</button>
-                        </div>
-                    }
-                </div>
-                // List of Labels
-
-                    :
-                    <div className="register">
-                        <input
-                            id="user-name"
-                            placeholder="Enter your name"
-                            name="userName"
-                            value= {userData.username}
-                            onChange={handleUsername}
-                        />
-                        <input
-                            id="user-pass"
-                            placeholder="Enter your password"
-                            name="password"
-                            value={userData.password}
-                            onChange={handlePassword}
-                        />
-
-                        <button type="button" onClick={registerUser}>
-                            Sign in
-                        </button>
-                        <button type="button" onClick={onChangeRegisterPage}>
-                            Register
-                        </button>
-
+                        }
                     </div>
-            }
-        </div>
+
+                        :
+                        <div className="register">
+                            <input
+                                id="user-name"
+                                placeholder="Enter your name"
+                                name="userName"
+                                value= {userData.username}
+                                onChange={handleUsername}
+                            />
+                            <input
+                                id="user-pass"
+                                placeholder="Enter your password"
+                                name="password"
+                                value={userData.password}
+                                onChange={handlePassword}
+                            />
+
+                            <button type="button" onClick={registerUser}>
+                                Sign in
+                            </button>
+                            <button type="button" onClick={onChangeRegisterPage}>
+                                Register
+                            </button>
+                        </div>
+                }
+            </div>
         )
     }
 }
