@@ -63,7 +63,7 @@ public class RaidSessionService {
     }
 
     public boolean authenticateStudent(RaidSession raid) {
-        // check if student email matches raidSession authorized domains.
+        // TODO: check if student email matches raidSession authorized domains.
         return true;
     }
 }
