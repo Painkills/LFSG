@@ -32,20 +32,20 @@ public class RaidRoomService {
     }
 
     public Note labelNote(String id, String label, String labelerId) {
-        try {
-            Note existingNote = noteRepo.findById(id).orElseThrow(() -> new Exception("Note not found with ID: " + id));
-            existingNote.setLabel(label);
-            noteRepo.save(existingNote);
+        Note existingNote = noteRepo.findById(id).orElseThrow();
+        existingNote.setLabel(label);
+        noteRepo.save(existingNote);
 
+        try{
             // Get gold for labeling
             Student student = studentRepo.findById(labelerId).orElseThrow();
             student.setGold(student.getGold() + 1);
             studentRepo.save(student);
-
-            return existingNote;
         } catch (Exception e) {
-            return null;
+            System.out.println(e);
         }
+
+        return existingNote;
     }
 
     public List<Note> getAllNotesByRoom(String room){
@@ -119,7 +119,7 @@ public class RaidRoomService {
         List<Vote> roomVotes = voteRepo.findAllByRoomIdOrderByStudentId(roomId);
         roomVotes.forEach((vote) -> {
             Note votedNote = noteRepo.findById(vote.getNoteId()).orElseThrow();
-            Student student = studentRepo.findById(votedNote.getSenderId()).orElseThrow();
+            Student student = studentRepo.findById(votedNote.getSenderName()).orElseThrow();
             student.setGold(student.getGold() + 1);
             studentRepo.save(student);
         });

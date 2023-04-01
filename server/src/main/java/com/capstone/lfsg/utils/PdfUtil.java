@@ -93,7 +93,7 @@ public class PdfUtil {
                 // Add Note Taker Info to the Table
                 Font noteTakerFont = FontFactory.getFont(FontFactory.COURIER_OBLIQUE, 12, BaseColor.BLACK);
                 PdfPCell noteTakerCell = new PdfPCell(new Paragraph(
-                        "Written By: " + note.getSenderId()
+                        "Written By: " + note.getSenderName()
                                 + "\nGold Earned: " + note.getGold() + "\n\n",
                         noteTakerFont));
                 noteTakerCell.setBorder(0);
