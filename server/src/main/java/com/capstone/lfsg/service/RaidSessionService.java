@@ -11,11 +11,9 @@ import java.util.UUID;
 public class RaidSessionService {
 
     private final RaidSessionRepo raidSessionRepo;
-    private final StudentService studentService;
 
-    public RaidSessionService(RaidSessionRepo raidSessionRepo, StudentService studentService) {
+    public RaidSessionService(RaidSessionRepo raidSessionRepo) {
         this.raidSessionRepo = raidSessionRepo;
-        this.studentService = studentService;
     }
 
     public static String generateId() {
@@ -27,7 +25,7 @@ public class RaidSessionService {
         raidSessionRepo.save(raid);
     }
 
-    public boolean addRaidRoom(String raidSessionId) {
+    public boolean addRaidRoomToSession(String raidSessionId) {
         try {
             RaidSession raid = raidSessionRepo.findById(raidSessionId)
                     .orElseThrow(() -> new Exception("Note not found with ID: " + raidSessionId));
