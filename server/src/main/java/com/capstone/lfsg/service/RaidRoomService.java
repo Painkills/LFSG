@@ -1,9 +1,6 @@
 package com.capstone.lfsg.service;
 
-import com.capstone.lfsg.data.Note;
-import com.capstone.lfsg.data.NoteRepo;
-import com.capstone.lfsg.data.Vote;
-import com.capstone.lfsg.data.VoteRepo;
+import com.capstone.lfsg.data.*;
 import com.capstone.lfsg.utils.PdfUtil;
 import com.itextpdf.text.*;
 import org.springframework.stereotype.Service;
@@ -19,11 +16,13 @@ import java.util.List;
 public class RaidRoomService {
     private final NoteRepo noteRepo;
     private final VoteRepo voteRepo;
+    private final StudentRepo studentRepo;
     private final PdfUtil pdfUtil;
 
-    public RaidRoomService(NoteRepo noteRepo, VoteRepo voteRepo, PdfUtil pdfUtil) {
+    public RaidRoomService(NoteRepo noteRepo, VoteRepo voteRepo, StudentRepo studentRepo, PdfUtil pdfUtil) {
         this.noteRepo = noteRepo;
         this.voteRepo = voteRepo;
+        this.studentRepo = studentRepo;
         this.pdfUtil = pdfUtil;
     }
 
@@ -32,11 +31,17 @@ public class RaidRoomService {
         noteRepo.save(note);
     }
 
-    public Note labelNote(String id, String label) {
+    public Note labelNote(String id, String label, String labelerId) {
         try {
             Note existingNote = noteRepo.findById(id).orElseThrow(() -> new Exception("Note not found with ID: " + id));
             existingNote.setLabel(label);
             noteRepo.save(existingNote);
+
+            // Get gold for labeling
+            Student student = studentRepo.findById(labelerId).orElseThrow();
+            student.setGold(student.getGold() + 1);
+            studentRepo.save(student);
+
             return existingNote;
         } catch (Exception e) {
             return null;
@@ -108,5 +113,15 @@ public class RaidRoomService {
 
             return modifiedNotes;
         }
+    }
+
+    public void awardGold(String roomId) {
+        List<Vote> roomVotes = voteRepo.findAllByRoomIdOrderByStudentId(roomId);
+        roomVotes.forEach((vote) -> {
+            Note votedNote = noteRepo.findById(vote.getNoteId()).orElseThrow();
+            Student student = studentRepo.findById(votedNote.getSenderId()).orElseThrow();
+            student.setGold(student.getGold() + 1);
+            studentRepo.save(student);
+        });
     }
 }

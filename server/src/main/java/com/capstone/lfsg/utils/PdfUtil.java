@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Date;
 
 @Service
 public class PdfUtil {
@@ -94,7 +93,7 @@ public class PdfUtil {
                 // Add Note Taker Info to the Table
                 Font noteTakerFont = FontFactory.getFont(FontFactory.COURIER_OBLIQUE, 12, BaseColor.BLACK);
                 PdfPCell noteTakerCell = new PdfPCell(new Paragraph(
-                        "Written By: " + note.getSenderName()
+                        "Written By: " + note.getSenderId()
                                 + "\nGold Earned: " + note.getGold() + "\n\n",
                         noteTakerFont));
                 noteTakerCell.setBorder(0);

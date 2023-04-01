@@ -1,11 +1,9 @@
 package com.capstone.lfsg.web;
 
 import com.capstone.lfsg.data.RaidSession;
-import com.capstone.lfsg.data.Student;
 import com.capstone.lfsg.service.RaidSessionService;
 import com.capstone.lfsg.service.StudentService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +27,7 @@ public class RaidSessionController {
 
     @PostMapping("/{raidSession}/addRoom")
     public void addRoomToSession(@PathVariable String raidSession) {
-        raidService.addRaidRoomToSession(raidSession);
+        Boolean success = raidService.addRaidRoomToSession(raidSession);
         // TODO: get frontend to reload data now that a new raidSession exists
     }
 
