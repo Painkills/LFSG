@@ -17,9 +17,8 @@ public class Note {
     private String senderName;
     private String label;
     private String message;
+    private String roomId;
     private LocalDateTime createdAt;
     private Status status;
-    private Integer gold;
-
-
+    private Integer gold = 0;
 }
