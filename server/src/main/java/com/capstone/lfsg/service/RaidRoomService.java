@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -29,12 +28,8 @@ public class RaidRoomService {
     }
 
     public void saveNote(Note note) {
-        try {
-            note.setCreatedAt(LocalDateTime.now());
-            noteRepo.save(note);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+        note.setCreatedAt(LocalDateTime.now());
+        noteRepo.save(note);
     }
 
     public Note labelNote(String id, String label) {
@@ -44,12 +39,9 @@ public class RaidRoomService {
             noteRepo.save(existingNote);
             return existingNote;
         } catch (Exception e) {
-            System.out.println(e);
             return null;
         }
     }
-
-//    public List<Note> upvoteNote(noteId)
 
     public List<Note> getAllNotesByRoom(String room){
         try {
@@ -104,7 +96,6 @@ public class RaidRoomService {
                 return modifiedNotes;
 
             } catch (Exception e) {
-                System.out.println(e);
                 return null;
             }
             // if the vote is unique, save it

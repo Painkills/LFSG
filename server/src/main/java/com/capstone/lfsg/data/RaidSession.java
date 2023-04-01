@@ -14,7 +14,30 @@ public class RaidSession {
 
     @Id
     private String id;
-    private List<Student> participants;
-    private List<String> roomIds;
-    private LocalDateTime createdAt;
+    private String courseCode;
+    private String courseName;
+    private String courseDescription;
+    private List<String> studentIdList;
+    private List<String> roomIdList;
+    private List<String> authorizedDomainList;
+
+    public void addStudent(String studentId) {
+        this.studentIdList.add(studentId);
+    }
+
+    public void removeStudent(String studentId) {
+        this.studentIdList.remove(studentId);
+    }
+
+    public void addRoom(String roomId) {
+        this.roomIdList.add(roomId);
+    }
+
+    public void addDomain(String domainId) {
+        this.authorizedDomainList.add(domainId);
+    }
+
+    public void removeDomain(String domain) {
+        this.authorizedDomainList.remove(domain);
+    }
 }
