@@ -20,7 +20,5 @@ public class Note {
     private String roomId;
     private LocalDateTime createdAt;
     private Status status;
-    private Integer gold;
-
-
+    private Integer gold = 0;
 }

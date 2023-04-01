@@ -88,13 +88,14 @@ public class PdfUtil {
                 Font noteFont = FontFactory.getFont(FontFactory.TIMES, 16, BaseColor.BLACK);
                 PdfPCell noteCell = new PdfPCell(new Paragraph(note.getMessage(), noteFont));
                 noteCell.setBorder(0);
+                noteCell.setPaddingBottom(10);
                 table.addCell(noteCell);
 
                 // Add Note Taker Info to the Table
                 Font noteTakerFont = FontFactory.getFont(FontFactory.COURIER_OBLIQUE, 12, BaseColor.BLACK);
                 PdfPCell noteTakerCell = new PdfPCell(new Paragraph(
                         "Written By: " + note.getSenderName()
-                                + "\nAt: " + note.getCreatedAt().toString(),
+                                + "\nGold Earned: " + note.getGold() + "\n\n",
                         noteTakerFont));
                 noteTakerCell.setBorder(0);
                 table.addCell(noteTakerCell);

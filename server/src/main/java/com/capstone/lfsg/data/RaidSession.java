@@ -2,7 +2,6 @@ package com.capstone.lfsg.data;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,10 +11,10 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class RaidSession {
+
     @Id
     private String id;
     private List<Student> participants;
-    private List<String> labels;
-    private List<Note> notes;
+    private List<String> roomIds;
     private LocalDateTime createdAt;
 }

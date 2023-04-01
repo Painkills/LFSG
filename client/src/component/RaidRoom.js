@@ -36,10 +36,6 @@ const RaidRoom = () => {
         role: 'none'
     });
 
-    // useEffect(() => {
-    //     console.log(unlabeledNotes)
-    // }, [unlabeledNotes]);
-
     // CONNECTION
     const connect =()=>{
         let Sock = new SockJS('http://localhost:8082/ws');
@@ -48,14 +44,13 @@ const RaidRoom = () => {
     }
 
     const onConnected = () => {
-        // placeholder to avoid empty username
-        const user = (userData.username === '')? 'Anonymous_User' : userData.username;
 
         setUserData({...userData,"connected": true});
         stompClient.subscribe('/room/' + raidRoomId + '/notes/unlabeled', onNoteSubmitted);
-        stompClient.subscribe('/room/' + raidRoomId + '/notes/labeled/*', onNoteLabeled);
-        stompClient.subscribe('/room/' + raidRoomId + '/notes/join/' + user, onJoined)
-        userJoin(user);
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/labeled/', onNoteLabeled);
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/join/' + userData.username, onJoined);
+        stompClient.subscribe('/room/' + raidRoomId + '/notes/voted/', onVote);
+        userJoin(userData.username);
     }
 
     const userJoin=(user)=>{
@@ -63,7 +58,7 @@ const RaidRoom = () => {
     }
 
     // METHODS THAT HANDLE MESSAGES RECEIVED FROM SERVER
-    const onNoteSubmitted = (payload)=>{
+    const onNoteSubmitted = (payload) =>{
         let payloadData = JSON.parse(payload.body)
         switch(payloadData.status){
             case "JOIN":
@@ -80,18 +75,15 @@ const RaidRoom = () => {
         }
     }
 
-    const onNoteLabeled = (payload)=>{
-        let payloadNote = JSON.parse(payload.body);
-
+    const onNoteLabeled = (payload) =>{
+        let receivedNote = JSON.parse(payload.body);
         // set the label for the note in unlabeledNotes, which will make it not show up in that category.
         unlabeledNotes.map((note) => {
-            if (note.id === payloadNote.id) {
-                note.label = payloadNote.label;
+            if (note.id === receivedNote.id) {
+                note.label = receivedNote.label;
             }
         })
-
-        // If note has a label, add it to that label in labeledNotes
-        noteLabelHelper(payloadNote)
+        noteLabelHelper(receivedNote)
     }
 
     const onJoined = (payload) => {
@@ -104,7 +96,6 @@ const RaidRoom = () => {
                 setUnlabeledNotes([...unlabeledNotes]);
             }
         })
-        console.log(unlabeledNotes)
     }
 
     const onError = (err) => {
@@ -112,15 +103,37 @@ const RaidRoom = () => {
 
     }
 
-    const noteLabelHelper = (payloadData) => {
-        if(labeledNotes.get(payloadData.label)){
-            labeledNotes.get(payloadData.label).push(payloadData);
+    const onVote = (payload) => {
+        const modifiedNotesArray = JSON.parse(payload.body);
+        modifiedNotesArray.forEach((modifiedNote) => {
+            const label = modifiedNote.label
+            const id = modifiedNote.id
+            const gold = modifiedNote.gold
+            setLabeledNotes(prevState => {
+                // Create a new copy of the labeledNotes object
+                const newLabeledNotes = new Map(prevState)
+                // Get the existing labeled note object with the given ID
+                const existingLabeledNote = newLabeledNotes.get(label).get(id)
+                // Create a new copy of the existing labeled note object with the updated gold property
+                const updatedLabeledNote = { ...existingLabeledNote, gold }
+                // Set the updated labeled note object in the newLabeledNotes map
+                newLabeledNotes.get(label).set(id, updatedLabeledNote)
+                // Return the newLabeledNotes map to update the state
+                return newLabeledNotes
+            })
+        })
+    }
+
+    const noteLabelHelper = (receivedNote) => {
+        // If note has a label, add it to that label in labeledNotes
+        if(labeledNotes.get(receivedNote.label)){
+            labeledNotes.get(receivedNote.label).set(receivedNote.id, receivedNote);
             setLabeledNotes(new Map(labeledNotes));
-            // if not, create a new label key in labeledNotes and save it there
+        // if not, create a new label key in labeledNotes and save it there
         }else{
-            let list =[];
-            list.push(payloadData);
-            labeledNotes.set(payloadData.label, list);
+            let list = new Map();
+            list.set(receivedNote.id, receivedNote);
+            labeledNotes.set(receivedNote.label, list);
             setLabeledNotes(new Map(labeledNotes));
         }
     }
@@ -142,12 +155,18 @@ const RaidRoom = () => {
     const labelNote = (index) => {
         setOpenNote(false);
         let note = unlabeledNotes[index]
-        let labelArray = userData.label.split(',')
+        let labelArray = userData.label.trim().split(',')
         for (let index in labelArray) {
             note.label = labelArray[index];
             stompClient.send("/app/labeled", {}, JSON.stringify(note));
         }
         setUserData({...userData, "label": ""});
+    }
+
+    const vote = (note) => {
+        if (stompClient) {
+            stompClient.send("/app/vote/" + userData.username, {}, JSON.stringify(note))
+        }
     }
 
     // REQUEST PDF OF NOTES FROM SERVER
@@ -199,10 +218,6 @@ const RaidRoom = () => {
     const handlePassword=(event)=>{
         const {value}=event.target;
         setUserData({...userData,"password": value});
-    }
-
-    const registerUser=()=>{
-        connect();
     }
 
     const onChangeRegisterPage=()=>{
@@ -367,7 +382,7 @@ const RaidRoom = () => {
                                                                         </div>
                                                                     ) : (
                                                                         <div>
-                                                                            <p>Vote Placeholder</p>
+                                                                            <button type="button" className="mini-button" onClick={() => vote(currentNote)}>Open Note</button>
                                                                         </div>
                                                                     )
                                                                     }
@@ -395,17 +410,21 @@ const RaidRoom = () => {
                                     {/* Labeled notes box */}
                                     {tab!=="UNLABELED" && <div className="chat-content">
                                         <ul className="chat-messages">
-                                            {[...labeledNotes.get(tab)].map((note,index)=>(
-                                                <li className={`message ${note.senderName === userData.username && "self"}`} key={index}>
+                                            {[...labeledNotes.get(tab)].map(([id, note])=>(
+                                                <li className={`message ${note.senderName === userData.username && "self"}`} key={id}>
                                                     {note.senderName !== userData.username && <div className="avatar">{note.senderName}</div>}
-                                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+                                                    <button type="button" className="mini-button" onClick={() => onSelectedNote(id)}>Open Note</button>
 
                                                     {/*Placeholder so I can see what is in these*/}
                                                     <div className="message-data">{note.message}</div>
 
-                                                    { (openNote === true && selectedNote === index) ? (
+                                                    { (openNote === true && selectedNote === id) ? (
                                                         <OpenedNote trigger={openNote}>
+                                                            <div className="message-data">Gold: {note.gold}</div>
                                                             <div className="message-data">{note.message}</div>
+                                                            <div>
+                                                                <button type="button" className="mini-button" onClick={() => vote(note)}>Give Gold!</button>
+                                                            </div>
                                                             <div>
                                                                 <button type="button" className="mini-button" onClick={() => setOpenNote(false)}>Close</button>
                                                             </div>
@@ -446,7 +465,7 @@ const RaidRoom = () => {
                                 onChange={handlePassword}
                             />
 
-                            <button type="button" onClick={registerUser}>
+                            <button type="button" onClick={connect}>
                                 Sign in
                             </button>
                             <button type="button" onClick={onChangeRegisterPage}>
