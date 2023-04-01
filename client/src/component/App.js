@@ -1,7 +1,9 @@
+import { Routes, Route, BrowserRouter } from "react-router-dom"
 import RaidRoom from './RaidRoom'
 import MainRoom from './MainRoom'
 import Layout from './Layout'
-import { Routes, Route, BrowserRouter } from "react-router-dom"
+import NoPage from "./NoPage";
+
 
 function App() {
     return (
@@ -11,6 +13,7 @@ function App() {
                     <Route element={<Layout />} >
                         <Route path="/" element={<MainRoom />} />
                         <Route path="room" element={<RaidRoom />} />
+                        <Route path="/*" element={<NoPage />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
