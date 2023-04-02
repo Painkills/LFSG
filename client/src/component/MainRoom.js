@@ -115,7 +115,7 @@ const RaidRoom = () => {
 
                     // If not, then show them the sign in screen
                     <div className="intro">
-                        <h1>Welcome Raider!</h1>
+                        <h1><b>Welcome Raider!</b></h1>
                         <div className="register">
                             <input
                                 id="user-name"
