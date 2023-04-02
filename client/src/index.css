@@ -71,8 +71,23 @@ mini-button{
   background: #79573E;
 }
 
-.Role-Select {
-  align-content: center;
+#role-select {
+  display: flex;
+  flex-wrap: wrap;
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+  vertical-align: center;
+}
+
+.role-img {
+  max-width: 100%;
+  display: block;
+}
+
+.role-object {
+  flex: 0 48%;
+  margin: 1% 1% 45px 1%;
 }
 
 .chat-box{
@@ -176,7 +191,9 @@ ul {
   width: 100%;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.2);
-
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;

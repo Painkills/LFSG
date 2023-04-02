@@ -292,11 +292,15 @@ const RaidRoom = () => {
                             </div>
                         </div>
                     ) :
-                    <div className="Role-Select">
-                        <img src={Sword} onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}/>
-                        <img src={Staff} onClick={() => setUserRole({...userRole, "role" : 'labeler'})}/>
-                        <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}>Note Taker</button>
-                        <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'labeler'})}>Labeler</button>
+                    <div id="role-select">
+                        <div className="role-object">
+                            <img src={Sword} className="role-img" onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}/>
+                            <h2 className="role-text">Note Taker</h2>
+                        </div>
+                        <div className="role-object">
+                            <img src={Staff} className="role-img" onClick={() => setUserRole({...userRole, "role" : 'labeler'})}/>
+                            <h2 className="role-text">Labeler</h2>
+                        </div>
                     </div>
                 }
             </div>
