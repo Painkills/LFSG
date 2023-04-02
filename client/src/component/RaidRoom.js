@@ -35,7 +35,8 @@ const RaidRoom = () => {
     }, []);
 
     const connect =()=>{
-        let Sock = new SockJS('http://localhost:8082/ws');
+        let Sock = new SockJS('https://lfsg1-d4tich.b4a.run/');
+        // let Sock = new SockJS('http://localhost:8082/ws');
         stompClient = over(Sock);
         stompClient.connect({},onConnected, onError);
     }
