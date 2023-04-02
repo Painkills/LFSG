@@ -1,8 +1,14 @@
-import React, { useState } from 'react'
+import React, {useEffect, useState} from 'react'
 import { Link } from "react-router-dom";
+import SockJS from "sockjs-client";
+import {over} from "stompjs";
 
 let stompClient =null;
+
+
 const RaidRoom = () => {
+
+
     // STATES
     const [registerPage, setRegisterPage] = useState(false);
     const [input, setInput] = useState({
@@ -45,57 +51,6 @@ const RaidRoom = () => {
         }
     }
 
-    const onInputChange = e => {
-        const { name, value } = e.target;
-        setInput(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        validateInput(e);
-    }
-
-    const validateInput = e => {
-        let { name, value } = e.target;
-        setError(prev => {
-            const stateObj = { ...prev, [name]: "" };
-
-            switch (name) {
-                case "name":
-                    if (!value) {
-                        stateObj[name] = "Please enter Name.";
-                    }
-                    break;
-                    case "email":
-                    if (!value) {
-                        stateObj[name] = "Please enter Email.";
-                    }
-                    break;
-
-                case "password":
-                    if (!value) {
-                        stateObj[name] = "Please enter Password.";
-                    } else if (input.confirmPassword && value !== input.confirmPassword) {
-                        stateObj["confirmPassword"] = "Password and Confirm Password does not match.";
-                    } else {
-                        stateObj["confirmPassword"] = input.confirmPassword ? "" : error.confirmPassword;
-                    }
-                    break;
-
-                case "confirmPassword":
-                    if (!value) {
-                        stateObj[name] = "Please enter Confirm Password.";
-                    } else if (input.password && value !== input.password) {
-                        stateObj[name] = "Password and Confirm Password does not match.";
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-
-            return stateObj;
-        });
-    }
 
     const register = () => {
         setUserData({...userData,"connected": true});
@@ -105,60 +60,28 @@ const RaidRoom = () => {
 
     // ===================== ACTUAL RENDERED PAGE BELOW THIS POINT ==================
     if(registerPage === true){
-        function Validate() {
-            if (input.password !== input.confirmPassword) {
-                alert("Passwords do not match.");
-                return false;
+        function validateForm(event) {
+            var password = document.getElementById("password").value;
+            var confirm_password = document.getElementById("confirm_password").value;
+
+            if (password !== confirm_password) {
+                alert("Passwords do not match");
+                event.preventDefault();
             }
-            return true;
         }
         return(
             <div className="app">
                 <form>
-                    <div style={{display: "flex"}}>
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder='Enter Name'
-                        value={input.name}
-                        onChange={onInputChange}
-                        onBlur={validateInput}/>
-                    {error.name && <span className='err'>{error.name}</span>}
-                    </div>
-                    <div style={{display: "flex"}}>
-                    <input
-                        type="text"
-                        name="email"
-                        placeholder='Enter Email'
-                        value={input.email}
-                        onChange={onInputChange}
-                        onBlur={validateInput}/>
-                    {error.email && <span className='err'>{error.email}</span>}
-                    </div>
+                    <label htmlFor="username">Username:</label>
+                    <input type="text" name="username" id="username" required/>
 
-                    <div style={{display: "flex"}}>
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder='Enter Password'
-                        value={input.password}
-                        onChange={onInputChange}
-                        onBlur={validateInput}/>
-                    {error.password && <span className='err'>{error.password}</span>}
-                    </div>
+                        <label htmlFor="password">Password:</label>
+                        <input type="password" name="password" id="password" required/>
 
-                    <div style={{display: "flex"}}>
-                    <input
-                        type="password"
-                        name="confirmPassword"
-                        placeholder='Enter Confirm Password'
-                        value={input.confirmPassword}
-                        onChange={onInputChange}
-                        onBlur={validateInput}/>
-                    {error.confirmPassword && <span className='err'>{error.confirmPassword}</span>}
-                    </div>
+                            <label htmlFor="confirm_password">Confirm Password:</label>
+                            <input type="password" name="confirm_password" id="confirm_password" required/>
 
-                    <button onClick={Validate}>Submit</button>
+                                <input type="submit" value="Submit" onClick={(event) => validateForm(event)}/>
                 </form>
             </div>
         )

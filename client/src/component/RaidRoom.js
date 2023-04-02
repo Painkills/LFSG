@@ -143,7 +143,7 @@ const RaidRoom = () => {
         let labelArray = userData.label.trim().split(',')
         for (let index in labelArray) {
             note.label = labelArray[index];
-            stompClient.send("/app/labeled", {}, JSON.stringify(note));
+            stompClient.send("/app/labeled/" + userName, {}, JSON.stringify(note));
         }
         setUserData({...userData, "label": ""});
     }

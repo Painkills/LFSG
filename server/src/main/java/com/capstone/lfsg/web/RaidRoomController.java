@@ -13,26 +13,32 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class RaidRoomController {
 
     private final RaidRoomService raidRoomService;
     private final SimpMessagingTemplate messageTemplate;
+    private final Map<String, LocalDateTime> roomLatestMessageList;
 
     public RaidRoomController(RaidRoomService raidRoomService, SimpMessagingTemplate messageTemplate) {
         this.raidRoomService = raidRoomService;
         this.messageTemplate = messageTemplate;
+        roomLatestMessageList = new HashMap<>();
     }
 
     // through GET /pdf
@@ -49,11 +55,11 @@ public class RaidRoomController {
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 
-
     // /app/join
     @MessageMapping("/join/{roomId}")
     public void getNotesInRoom(@DestinationVariable String roomId, @Payload String username) {
-        System.out.println(username + " joined room " + roomId);
+        roomLatestMessageList.put(roomId, LocalDateTime.now());
+        System.out.println(roomLatestMessageList);
         Iterable<Note> notesInRoom = raidRoomService.getAllNotesByRoom(roomId);
         messageTemplate.convertAndSend("/room/" + roomId + "/notes/join/" + username, notesInRoom);
     }
@@ -65,15 +71,14 @@ public class RaidRoomController {
         System.out.println("From receiveUnsortedNote: " + note);
         raidRoomService.saveNote(note);
         messageTemplate.convertAndSend("/room/" + note.getRoomId() + "/notes/unlabeled", note);
-//        messageTemplate.convertAndSend("/notes/unlabeled", note);
     }
 
 
     // /app/labeled
-    @MessageMapping("/labeled")
-    public void receiveLabeledNote(@Payload Note note) {
+    @MessageMapping("/labeled/{labelerId}")
+    public void receiveLabeledNote(@Payload Note note, @DestinationVariable String labelerId) {
         System.out.println("From receiveLabeledNote: " + note);
-        Note existingNote = raidRoomService.labelNote(note.getId(), note.getLabel());
+        Note existingNote = raidRoomService.labelNote(note.getId(), note.getLabel(), labelerId);
         messageTemplate.convertAndSend("/room/" + note.getRoomId() + "/notes/labeled/", existingNote);
     }
 
@@ -82,9 +87,19 @@ public class RaidRoomController {
     public void receiveVotedNote(@DestinationVariable String userName, @Payload Note note) {
         List<Note> modifiedNotes = raidRoomService.handleVote(userName, note);
         messageTemplate.convertAndSend("/room/" + note.getRoomId() + "/notes/voted/", modifiedNotes);
-        System.out.println("--- Modified Notes ---");
-        System.out.println(modifiedNotes);
-        // TODO: Frontend deals with the modified notes
     }
 
+    @Scheduled(fixedRate = 3600000) // check every 1 hours
+    private void hasReceivedMessageRecently() {
+        roomLatestMessageList.forEach((raidRoom, timeOfLastSubscription) -> {
+            Duration duration = Duration.between(timeOfLastSubscription, LocalDateTime.now());
+            if (duration.toHours() > 3) {
+                awardGold(raidRoom);
+            }
+        });
+    }
+
+    private void awardGold(String raidRoom) {
+        raidRoomService.awardGold(raidRoom);
+    }
 }
