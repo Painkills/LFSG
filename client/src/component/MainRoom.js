@@ -114,28 +114,31 @@ const RaidRoom = () => {
                     :
 
                     // If not, then show them the sign in screen
-                    <div className="register">
-                        <input
-                            id="user-name"
-                            placeholder="Enter your name"
-                            name="userName"
-                            value= {userData.username}
-                            onChange={handleUsername}
-                        />
-                        <input
-                            id="user-pass"
-                            placeholder="Enter your password"
-                            name="password"
-                            value={userData.password}
-                            onChange={handlePassword}
-                        />
+                    <div className="intro">
+                        <h1>Welcome Raider!</h1>
+                        <div className="register">
+                            <input
+                                id="user-name"
+                                placeholder="Enter your name"
+                                name="userName"
+                                value= {userData.username}
+                                onChange={handleUsername}
+                            />
+                            <input
+                                id="user-pass"
+                                placeholder="Enter your password"
+                                name="password"
+                                value={userData.password}
+                                onChange={handlePassword}
+                            />
 
-                        <button type="button" onClick={register}>
-                            Sign in
-                        </button>
-                        <button type="button" onClick={onChangeRegisterPage}>
-                            Register
-                        </button>
+                            <button type="button" onClick={register}>
+                                Sign in
+                            </button>
+                            <button type="button" onClick={onChangeRegisterPage}>
+                                Register
+                            </button>
+                        </div>
                     </div>
                 }
             </div>

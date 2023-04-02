@@ -1,5 +1,5 @@
 import React from 'react'
-import './OpenedNote.css'
+import '../index.css'
 
 function OpenedNote(props) {
     return (props.trigger) ? (

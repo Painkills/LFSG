@@ -3,6 +3,9 @@ import { useLocation } from 'react-router-dom'
 import { over } from 'stompjs';
 import SockJS from 'sockjs-client';
 import OpenedNote from './OpenedNote'
+import Sword from '../assets/sword.png'
+import Staff from '../assets/staff.png'
+import ClosedScroll from '../assets/ClosedScroll.png'
 
 let stompClient =null;
 const RaidRoom = () => {
@@ -216,7 +219,7 @@ const RaidRoom = () => {
                                         return (
                                             <li className={`message ${currentNote.senderName === userName && "self"}`} key={index}>
                                                 {currentNote.senderName !== userName && <div className="avatar">{currentNote.senderName}</div>}
-                                                <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+                                                <button type="button" className="scroll" onClick={() => onSelectedNote(index)}>Open Note</button>
 
                                                 {/*Placeholder so I can see what is in these*/}
                                                 <div className="message-data">{currentNote.message}</div>
@@ -261,7 +264,7 @@ const RaidRoom = () => {
                                     {[...labeledNotes.get(tab)].map(([id, note])=>(
                                         <li className={`message ${note.senderName === userName && "self"}`} key={id}>
                                             {note.senderName !== userName && <div className="avatar">{note.senderName}</div>}
-                                            <button type="button" className="mini-button" onClick={() => onSelectedNote(id)}>Open Note</button>
+                                            <button type="button" className="scroll" onClick={() => onSelectedNote(id)}>Open Note</button>
 
                                             {/*Placeholder so I can see what is in these*/}
                                             <div className="message-data">{note.message}</div>
@@ -289,9 +292,15 @@ const RaidRoom = () => {
                             </div>
                         </div>
                     ) :
-                    <div>
-                        <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}>Note Taker</button>
-                        <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'labeler'})}>Labeler</button>
+                    <div id="role-select">
+                        <div className="role-object">
+                            <img src={Sword} className="role-img" onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}/>
+                            <h2 className="role-text">Note Taker</h2>
+                        </div>
+                        <div className="role-object">
+                            <img src={Staff} className="role-img" onClick={() => setUserRole({...userRole, "role" : 'labeler'})}/>
+                            <h2 className="role-text">Labeler</h2>
+                        </div>
                     </div>
                 }
             </div>
