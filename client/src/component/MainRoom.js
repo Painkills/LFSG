@@ -31,6 +31,10 @@ const RaidRoom = () => {
         message: ''
     });
 
+    const [roomList, setRoomList] = useState({
+        rooms: []
+    })
+
 
     // LOGIN METHODS
     const handleUsername=(event)=>{
@@ -54,6 +58,16 @@ const RaidRoom = () => {
 
     const register = () => {
         setUserData({...userData,"connected": true});
+    }
+
+    const getRooms = () => {
+        fetch("http://localhost:8082/sessions/getAll")
+            .then(response => {
+
+            })
+            .catch(error => {
+                console.error('Error fetching rooms:', error);
+            });
     }
 
 

@@ -5,6 +5,7 @@ import SockJS from 'sockjs-client';
 import OpenedNote from './OpenedNote'
 import Sword from '../assets/sword.png'
 import Staff from '../assets/staff.png'
+import Gate from '../assets/Gate_Closed.png'
 
 let stompClient =null;
 const RaidRoom = () => {
