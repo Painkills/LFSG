@@ -98,9 +98,6 @@ const logInAttempt=()=>{
                                 <label htmlFor="Email">Email:</label><br/>
                                 <input type="email" name="email" id="email" required/>
                     <br/>
-                        <label htmlFor="avatarId">Avatar Name:</label><br/>
-                        <input type="text" name="avatarId" id="avatarId" required/>
-                    <br/>
                                 <input type="submit" value="Submit" onClick={(event) => validateForm(event)}/>
                 </form>
             </div>
