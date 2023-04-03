@@ -124,16 +124,17 @@ const logInAttempt=()=>{
             // Raid Room Area
             <div className="container">
                 {userData.connected?
+
                     // If the user IS connected...
-                    <div>
-                        <div>
+                    <div id="room-select">
+                        <div className="room">
                             <Link to='/room' state = {{
                                 roomId: "111",
                                 username: nickNameData.nickname
                             }}> Go to Raid Room 111
                             </Link>
                         </div>
-                        <div>
+                        <div className="room">
                             <Link to='/room' state = {{
                                 roomId: "112",
                                 username: nickNameData.nickname
@@ -146,43 +147,31 @@ const logInAttempt=()=>{
                     :
 
                     // If not, then show them the sign in screen
-                    // <div className="register">
-                    //     <input
-                    //         id="user-name"
-                    //         placeholder="Enter your name"
-                    //         name="userName"
-                    //         value= {userData.username}
-                    //         onChange={handleUsername}
-                    //     />
-                    //     <input
-                    //         id="user-pass"
-                    //         placeholder="Enter your password"
-                    //         name="password"
-                    //         value={userData.password}
-                    //         onChange={handlePassword}
-                    //     />
+                    <div className="intro">
+                    <h1><b>Welcome Raider!</b></h1>
                     <div className="register">
-                        <input
-                            id="user-email"
-                            placeholder="Enter your email"
-                            name="Email"
-                            value= {userData.email}
-                            onChange={handleEmail}
-                        />
-                        <input
-                            id="user-pass"
-                            placeholder="Enter your password"
-                            name="password"
-                            value={userData.password}
-                            onChange={handlePassword}
-                        />
+                    <input
+                    id="user-email"
+                    placeholder="Enter your email"
+                    name="Email"
+                    value= {userData.email}
+                    onChange={handleEmail}
+                    />
+                    <input
+                    id="user-pass"
+                    placeholder="Enter your password"
+                    name="password"
+                    value={userData.password}
+                    onChange={handlePassword}
+                    />
 
-                        <button type="button" onClick={logInAttempt}>
-                            Sign in
-                        </button>
-                        <button type="button" onClick={onChangeRegisterPage}>
-                            Register
-                        </button>
+                    <button type="button" onClick={logInAttempt}>
+                    Sign in
+                    </button>
+                    <button type="button" onClick={onChangeRegisterPage}>
+                    Register
+                    </button>
+                        </div>
                     </div>
                 }
             </div>
