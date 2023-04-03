@@ -1,13 +1,17 @@
-#FROM openjdk:19
-#
-#COPY target/lfsg-0.0.1-SNAPSHOT.jar app.jar
-#
-#ENTRYPOINT ["java", "-jar", "/app.jar"]
+# Use a Node.js runtime as the base image
+FROM node:latest
 
+# Set the working directory inside the container
+WORKDIR /app
 
-FROM openjdk:19
-VOLUME /tmp
-EXPOSE 8082
-ARG JAR_FILE=server/target/lfsg-0.0.1-SNAPSHOT.jar
-ADD ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+# Copy the client files to the container
+COPY /client /app
+
+# Install the dependencies for the client
+RUN npm install
+
+# Expose port 3000 for the client
+EXPOSE 3000
+
+# Run the client when the container starts
+CMD ["npm", "start"]

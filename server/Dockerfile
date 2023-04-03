@@ -1,13 +1,14 @@
-#FROM openjdk:19
-#
-#COPY target/lfsg-0.0.1-SNAPSHOT.jar app.jar
-#
-#ENTRYPOINT ["java", "-jar", "/app.jar"]
+# Use an OpenJDK 19 runtime as the base image
+FROM openjdk:19-jdk-alpine
 
+# Set the working directory inside the container
+WORKDIR /app
 
-FROM openjdk:19
-VOLUME /tmp
+# Copy the server files to the container
+COPY target/lfsg-0.0.1-SNAPSHOT.jar /app/server.jar
+
+# Expose port 8082 for the server
 EXPOSE 8082
-ARG JAR_FILE=target/lfsg-0.0.1-SNAPSHOT.jar
-ADD ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+
+# Run the server when the container starts
+CMD ["java", "-jar", "server.jar"]
