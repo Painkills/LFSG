@@ -31,10 +31,6 @@ const RaidRoom = () => {
         message: ''
     });
 
-    const [roomList, setRoomList] = useState({
-        rooms: []
-    })
-
 
     // LOGIN METHODS
     const handleUsername=(event)=>{
@@ -58,16 +54,6 @@ const RaidRoom = () => {
 
     const register = () => {
         setUserData({...userData,"connected": true});
-    }
-
-    const getRooms = () => {
-        fetch("http://localhost:8082/sessions/getAll")
-            .then(response => {
-
-            })
-            .catch(error => {
-                console.error('Error fetching rooms:', error);
-            });
     }
 
 
@@ -107,15 +93,15 @@ const RaidRoom = () => {
                 {userData.connected?
 
                     // If the user IS connected...
-                    <div>
-                        <div>
+                    <div id="room-select">
+                        <div className="room">
                             <Link to='/room' state = {{
                                 roomId: "111",
                                 username: userData.username
                             }}> Go to Raid Room 111
                             </Link>
                         </div>
-                        <div>
+                        <div className="room">
                             <Link to='/room' state = {{
                                 roomId: "112",
                                 username: userData.username

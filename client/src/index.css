@@ -195,10 +195,6 @@ ul {
   font-family: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', serif;
 }
 
-.message-full {
-
-}
-
 .message-id{
   padding:5px;
   font-size: xx-small;
@@ -238,4 +234,27 @@ ul {
   position: absolute;
   top: 16px;
   right: 16px;
+}
+
+#room-select {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: auto;
+  width: 25%;
+  padding: 10px;
+  vertical-align: center;
+  background: #009FB7;
+  border-radius: 15px;
+}
+
+.room {
+  float:right;
+  margin-left:10px;
+  flex: 0 48%;
+  border-style: solid;
+  background: #FED766;
+  border-color: black;
+  color: black;
 }
