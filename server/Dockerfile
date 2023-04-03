@@ -8,6 +8,7 @@
 FROM openjdk:19
 VOLUME /tmp
 EXPOSE 8082
+ADD target /target
 ARG JAR_FILE=target/lfsg-0.0.1-SNAPSHOT.jar
 ADD ${JAR_FILE} app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
