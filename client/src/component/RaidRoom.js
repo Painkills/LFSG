@@ -35,7 +35,7 @@ const RaidRoom = () => {
     }, []);
 
     const connect =()=>{
-        const Sock = new SockJS('wss://lfsg1-d4tich.b4a.run/ws', null, {
+        const Sock = new SockJS('https://lfsg1-d4tich.b4a.run/ws', null, {
             transports: ['websocket'],
             secure: true,
             rejectUnauthorized: false
