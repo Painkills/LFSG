@@ -302,11 +302,11 @@ const RaidRoom = () => {
                     ) :
                     <div id="role-select">
                         <div className="role-object">
-                            <img src={Sword} className="role-img" alt={Sword} onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}/>
+                            <img src={Sword} alt={Sword} onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}/>
                             Note Taker
                         </div>
                         <div className="role-object">
-                            <img src={Staff} className="role-img" alt={Staff} onClick={() => setUserRole({...userRole, "role" : 'labeler'})}/>
+                            <img src={Staff} alt={Staff} onClick={() => setUserRole({...userRole, "role" : 'labeler'})}/>
                             Labeler
                         </div>
                     </div>
