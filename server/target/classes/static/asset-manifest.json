@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.6f3f66d6.css",
+    "main.js": "/static/js/main.3ba9f757.js",
+    "static/media/ScrollBackground.png": "/static/media/ScrollBackground.b26b6d9a794f1bbe634c.png",
+    "static/media/UncialAntiqua-Regular.ttf": "/static/media/UncialAntiqua-Regular.47d8269b6e7e7ec41fe9.ttf",
+    "static/media/ClosedScroll.png": "/static/media/ClosedScroll.b539d300bde06aef0dab.png",
+    "index.html": "/index.html",
+    "main.6f3f66d6.css.map": "/static/css/main.6f3f66d6.css.map",
+    "main.3ba9f757.js.map": "/static/js/main.3ba9f757.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6f3f66d6.css",
+    "static/js/main.3ba9f757.js"
+  ]
+}

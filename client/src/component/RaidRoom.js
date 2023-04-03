@@ -3,6 +3,9 @@ import { useLocation } from 'react-router-dom'
 import { over } from 'stompjs';
 import SockJS from 'sockjs-client';
 import OpenedNote from './OpenedNote'
+import Sword from '../assets/sword.png'
+import Staff from '../assets/staff.png'
+import Gate from '../assets/Gate_Closed.png'
 
 let stompClient =null;
 const RaidRoom = () => {
@@ -33,6 +36,12 @@ const RaidRoom = () => {
     }, []);
 
     const connect =()=>{
+        // const Sock = new SockJS('https://lfsg1-d4tich.b4a.run/wss', null, {
+        //     transports: ['websocket'],
+        //     secure: true,
+        //     rejectUnauthorized: false
+        // });
+        // let Sock = new SockJS('https://lfsg1-d4tich.b4a.run/');
         let Sock = new SockJS('http://localhost:8082/ws');
         stompClient = over(Sock);
         stompClient.connect({},onConnected, onError);
@@ -215,15 +224,16 @@ const RaidRoom = () => {
                                         if (currentNote.label !== null) return null;
                                         return (
                                             <li className={`message ${currentNote.senderName === userName && "self"}`} key={index}>
-                                                {currentNote.senderName !== userName && <div className="avatar">{currentNote.senderName}</div>}
-                                                <button type="button" className="mini-button" onClick={() => onSelectedNote(index)}>Open Note</button>
+                                                {currentNote.senderName !== userName}
+                                                <button type="button" className="scroll" onClick={() => onSelectedNote(index)}>Open Note</button>
 
                                                 {/*Placeholder so I can see what is in these*/}
-                                                <div className="message-data">{currentNote.message}</div>
+                                                <div className="message-preview">{currentNote.message}</div>
 
                                                 { (openNote === true && selectedNote === index) ? (
                                                     <OpenedNote trigger={openNote}>
-                                                        <div className="message-data">{currentNote.message}</div>
+                                                        <div className="message-full">{currentNote.message}</div>
+                                                        <div className="message-full">Author: {currentNote.senderName}</div>
                                                         <div className="message-id">
                                                             { (userRole.role === 'labeler') ? (
                                                                 <div>
@@ -241,7 +251,7 @@ const RaidRoom = () => {
                                                     </OpenedNote>
                                                 ) : null
                                                 }
-                                                {currentNote.senderName === userName && <div className="avatar self">{currentNote.senderName}</div>}
+                                                {currentNote.senderName === userName}
                                             </li>
                                         )})}
                                 </ul>
@@ -260,16 +270,17 @@ const RaidRoom = () => {
                                 <ul className="chat-messages">
                                     {[...labeledNotes.get(tab)].map(([id, note])=>(
                                         <li className={`message ${note.senderName === userName && "self"}`} key={id}>
-                                            {note.senderName !== userName && <div className="avatar">{note.senderName}</div>}
-                                            <button type="button" className="mini-button" onClick={() => onSelectedNote(id)}>Open Note</button>
+                                            {note.senderName !== userName}
+                                            <button type="button" className="scroll" onClick={() => onSelectedNote(id)}>Open Note</button>
 
                                             {/*Placeholder so I can see what is in these*/}
-                                            <div className="message-data">{note.message}</div>
+                                            <div className="message-preview">{note.message}</div>
 
                                             { (openNote === true && selectedNote === id) ? (
                                                 <OpenedNote trigger={openNote}>
-                                                    <div className="message-data">Gold: {note.gold}</div>
-                                                    <div className="message-data">{note.message}</div>
+                                                    <div className="message-full">Gold: {note.gold}</div>
+                                                    <div className="message-full">{note.message}</div>
+                                                    <div className="message-full">Author: {note.senderName}</div>
                                                     <div>
                                                         <button type="button" className="mini-button" onClick={() => vote(note)}>Give Gold!</button>
                                                     </div>
@@ -279,7 +290,7 @@ const RaidRoom = () => {
                                                 </OpenedNote>
                                             ) : null
                                             }
-                                            {note.senderName === userName && <div className="avatar self">{note.senderName}</div>}
+                                            {note.senderName === userName}
                                         </li>
                                     ))}
                                 </ul>
@@ -289,9 +300,15 @@ const RaidRoom = () => {
                             </div>
                         </div>
                     ) :
-                    <div>
-                        <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}>Note Taker</button>
-                        <button type="button" className="mini-button" onClick={() => setUserRole({...userRole, "role" : 'labeler'})}>Labeler</button>
+                    <div id="role-select">
+                        <div className="role-object">
+                            <img src={Sword} className="role-img" alt={Sword} onClick={() => setUserRole({...userRole, "role" : 'notetaker'})}/>
+                            Note Taker
+                        </div>
+                        <div className="role-object">
+                            <img src={Staff} className="role-img" alt={Staff} onClick={() => setUserRole({...userRole, "role" : 'labeler'})}/>
+                            Labeler
+                        </div>
                     </div>
                 }
             </div>
